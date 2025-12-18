@@ -28,7 +28,7 @@ export default function Login() {
 
   const onSubmit = async (data) => {
     try {
-      const result = await axios.post("http://localhost:3000/login", {
+      const result = await axios.post("https://medilink-backend-1-26fb.onrender.com/login", {
         email: data.email,
         password: data.password,
         role: data.role,

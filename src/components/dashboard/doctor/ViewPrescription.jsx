@@ -25,7 +25,7 @@ export default function ViewPrescription({ patient }) {
       try {
         if (patient._id === undefined) return;
         const res = await axios.get(
-          `http://localhost:3000/patient/prescriptions/${patient?._id}`
+          `https://medilink-backend-1-26fb.onrender.com/patient/prescriptions/${patient?._id}`
         );
         setPrescriptions(res.data);
         console.log(res.data);

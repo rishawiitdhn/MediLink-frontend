@@ -35,7 +35,7 @@ export default function Signup() {
     const getAllHospitals = async () => {
       try {
         const allHospitals = await axios.get(
-          "http://localhost:3000/admin/hospitals"
+          "https://medilink-backend-1-26fb.onrender.com/admin/hospitals"
         );
         console.log(allHospitals.data);
         setHospitals(allHospitals.data);
@@ -51,7 +51,7 @@ export default function Signup() {
     const getHospital = async () => {
       try{
         if(hospital){
-          const res = await axios.get(`http://localhost:3000/admin/hospital/${hospital}`);
+          const res = await axios.get(`https://medilink-backend-1-26fb.onrender.com/admin/hospital/${hospital}`);
           setDepartments(res.data.departments);
         }
       }catch(err){
@@ -65,7 +65,7 @@ export default function Signup() {
   const onSubmit = async (data) => {
     try {
       console.log(data);
-      const result = await axios.post("http://localhost:3000/register", {
+      const result = await axios.post("https://medilink-backend-1-26fb.onrender.com/register", {
         name: data.name,
         email: data.email,
         password: data.password,

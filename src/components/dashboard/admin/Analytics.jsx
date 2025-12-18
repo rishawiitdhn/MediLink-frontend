@@ -33,7 +33,7 @@ export default function Analytics() {
     const getAppointmentsPerDay = async () => {
       try {
         const res = await axios.get(
-          "http://localhost:3000/admin/analytics/appointmentsperday"
+          "https://medilink-backend-1-26fb.onrender.com/admin/analytics/appointmentsperday"
         );
         // console.log(res.data);
         setAppointmentData(res.data);
@@ -48,7 +48,7 @@ export default function Analytics() {
     const fetchSpeciallisationData = async () => {
       try {
         const res = await axios.get(
-          "http://localhost:3000/admin/analytics/speciallisation"
+          "https://medilink-backend-1-26fb.onrender.com/admin/analytics/speciallisation"
         );
         // console.log(res.data);
         setSpecializationData(res.data);
@@ -64,7 +64,7 @@ export default function Analytics() {
     const fetchHospitalData = async () => {
       try {
         const res = await axios.get(
-          "http://localhost:3000/admin/analytics/prescriptions"
+          "https://medilink-backend-1-26fb.onrender.com/admin/analytics/prescriptions"
         );
         setHospitalData(res.data);
       } catch (err) {

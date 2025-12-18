@@ -32,7 +32,7 @@ export default function AddHospital() {
   const onSubmit = async (data) => {
     try {
       const res = await axios.post(
-        "http://localhost:3000/admin/hospitals",
+        "https://medilink-backend-1-26fb.onrender.com/admin/hospitals",
         {
           name: data.name,
           email: data.email,

@@ -13,7 +13,7 @@ export default function () {
   useEffect(() => {
     const getAllPharmacies = async () => {
       try {
-        const res = await axios.get("http://localhost:3000/pharmacy/all");
+        const res = await axios.get("https://medilink-backend-1-26fb.onrender.com/pharmacy/all");
         setPharmacies(res.data);
       } catch (err) {
         console.error("Error during fetching all pharmacies: ", err);
@@ -28,7 +28,7 @@ export default function () {
   const handleApprovePharmacies = async (pharmacyId) => {
     try {
       const res = await axios.patch(
-        `http://localhost:3000/admin/pharmacy/${pharmacyId}`,
+        `https://medilink-backend-1-26fb.onrender.com/admin/pharmacy/${pharmacyId}`,
         {},
         {
           headers: {

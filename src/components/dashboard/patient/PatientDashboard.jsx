@@ -51,7 +51,7 @@ export default function PatientDashboard() {
     const getPatient = async () => {
       try {
         const res = await axios.get(
-          `http://localhost:3000/patient/${patientId}`
+          `https://medilink-backend-1-26fb.onrender.com/patient/${patientId}`
         );
         console.log(res.data);
         setPatient(res.data);

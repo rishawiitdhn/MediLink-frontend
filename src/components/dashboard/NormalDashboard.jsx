@@ -23,17 +23,17 @@ export default function NormalDashboard() {
 
   useEffect(() => {
     const getData = async () => {
-      const res1 = await axios.get("http://localhost:3000/doctor/all");
+      const res1 = await axios.get("https://medilink-backend-1-26fb.onrender.com/doctor/all");
       setDoctorCount(res1.data.length);
       setDoctors(res1.data);
 
-      const res2 = await axios.get("http://localhost:3000/pharmacy/all");
+      const res2 = await axios.get("https://medilink-backend-1-26fb.onrender.com/pharmacy/all");
       setPharmacyCount(res2.data.length);
 
-      const res3 = await axios.get("http://localhost:3000/patient/all");
+      const res3 = await axios.get("https://medilink-backend-1-26fb.onrender.com/patient/all");
       setPatientCount(res3.data.length);
 
-      const res4 = await axios.get("http://localhost:3000/admin/hospitals");
+      const res4 = await axios.get("https://medilink-backend-1-26fb.onrender.com/admin/hospitals");
       setHospitalCount(res4.data.length);
     };
 

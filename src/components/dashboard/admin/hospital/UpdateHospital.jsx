@@ -49,7 +49,7 @@ export default function UpdateHospital() {
       });
 
       const res = await axios.patch(
-        `http://localhost:3000/admin/hospitals/${hospital._id}`, formData,
+        `https://medilink-backend-1-26fb.onrender.com/admin/hospitals/${hospital._id}`, formData,
         {
           headers: {
             Authorization: `Bearer ${role}`,
@@ -76,7 +76,7 @@ export default function UpdateHospital() {
     const getHospital = async () => {
       try {
         const res = await axios.get(
-          `http://localhost:3000/admin/hospitals/${hospitalId}`,
+          `https://medilink-backend-1-26fb.onrender.com/admin/hospitals/${hospitalId}`,
           {
             headers: {
               Authorization: `Bearer ${role}`,

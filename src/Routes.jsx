@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useEffect } from "react";
 import {useNavigate, useRoutes} from "react-router-dom"
 
@@ -23,11 +23,13 @@ const role = localStorage.getItem("role");
 
 const ProjectRoutes = () => {
     const {currUser, setCurrUser} = useAuth();
+    const [role, setRole] = useState();
     const navigate = useNavigate();
 
     useEffect(()=> {
         const userIdFromStorage = localStorage.getItem("userId");
-
+        const roleFromStorage = localStorage.getItem("role");
+        setRole(roleFromStorage);
         if(!userIdFromStorage && !["/login", "/signup", "/"].includes(window.location.pathname)){
             navigate("/");
         }

@@ -24,27 +24,29 @@ export default function Overview() {
   const [searchVal, setSearchVal] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [refresh, setRefresh] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const [selectedDate, setSelectedDate] = useState(dayjs());
 
   const userId = localStorage.getItem("userId");
   const role = localStorage.getItem("role");
   useEffect(() => {
     const getData = async () => {
-      const res1 = await axios.get("http://localhost:3000/doctor/all/verified");
+      const res1 = await axios.get("https://medilink-backend-1-26fb.onrender.com/doctor/all/verified");
       setDoctorCount(res1.data.length);
       setDoctors(res1.data);
       console.log(res1.data);
 
-      const res2 = await axios.get("http://localhost:3000/pharmacy/all");
+      const res2 = await axios.get("https://medilink-backend-1-26fb.onrender.com/pharmacy/all");
       setPharmacyCount(res2.data.length);
 
-      const res3 = await axios.get("http://localhost:3000/patient/all");
+      const res3 = await axios.get("https://medilink-backend-1-26fb.onrender.com/patient/all");
       setPatientCount(res3.data.length);
 
-      const res4 = await axios.get("http://localhost:3000/admin/hospitals");
+      const res4 = await axios.get("https://medilink-backend-1-26fb.onrender.com/admin/hospitals");
       setHospitalCount(res4.data.length);
 
-      const res5 = await axios.get(`http://localhost:3000/patient/${userId}`);
+      const res5 = await axios.get(`https://medilink-backend-1-26fb.onrender.com/patient/${userId}`);
       setPatient(res5.data);
     };
 
@@ -73,8 +75,9 @@ export default function Overview() {
 
   const handleAppointment = async (doctor) => {
     try {
+      setIsSubmitting(true);
       const res = await axios.post(
-        `http://localhost:3000/patient/appointment/${userId}/${doctor._id}/${doctor.hospital._id}`, {
+        `https://medilink-backend-1-26fb.onrender.com/patient/appointment/${userId}/${doctor._id}/${doctor.hospital._id}`, {
           date: selectedDate.format("YYYY-MM-DD")
         },
         {
@@ -83,7 +86,7 @@ export default function Overview() {
           }
         }
       );
-
+      setIsSubmitting(false);
       setRefresh((prev) => !prev);
       // toast.success(res.data.message);
       if (res.data.type === "info") toast.info(res.data.message);
@@ -229,7 +232,8 @@ export default function Overview() {
                     <div className="flex justify-center">
                       <button
                         onClick={() => handleAppointment(doctor)}
-                        className={`px-4 py-1 text-white rounded-lg hover:cursor-pointer font-semibold mt-2 ${
+                        disabled={isSubmitting}
+                        className={`px-4 py-1 text-white rounded-lg font-semibold mt-2 ${isSubmitting ? "hover:cursor-not-allowed" : "hover:cursor-pointer"} ${
                           doctor.appointments.find(
                             (appt) => (appt.patient === userId) && (appt.date.split("T")[0] === selectedDate.format("YYYY-MM-DD"))
                           )

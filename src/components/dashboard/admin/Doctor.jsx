@@ -12,7 +12,7 @@ export default function Doctor() {
   const role = localStorage.getItem("role");
   useEffect(() => {
     const getData = async () => {
-      const res1 = await axios.get("http://localhost:3000/doctor/all");
+      const res1 = await axios.get("https://medilink-backend-1-26fb.onrender.com/doctor/all");
       setDoctors(res1.data);
     };
 
@@ -43,7 +43,7 @@ export default function Doctor() {
   const approveDoctors = async (id) => {
     try {
       const res = await axios.patch(
-        `http://localhost:3000/admin/doctor/approve/${id}`,
+        `https://medilink-backend-1-26fb.onrender.com/admin/doctor/approve/${id}`,
         {},
         {
           headers: {
@@ -51,7 +51,7 @@ export default function Doctor() {
           },
         }
       );
-      const res1 = await axios.get("http://localhost:3000/doctor/all");
+      const res1 = await axios.get("https://medilink-backend-1-26fb.onrender.com/doctor/all");
       setDoctors(res1.data);
 
       toast.success("Verified!!");
@@ -66,7 +66,7 @@ export default function Doctor() {
   const disapproveDoctors = async (id) => {
     try {
       const res = await axios.patch(
-        `http://localhost:3000/admin/doctor/disapprove/${id}`,
+        `https://medilink-backend-1-26fb.onrender.com/admin/doctor/disapprove/${id}`,
         {},
         {
           headers: {
@@ -75,7 +75,7 @@ export default function Doctor() {
         }
       );
 
-      const res1 = await axios.get("http://localhost:3000/doctor/all");
+      const res1 = await axios.get("https://medilink-backend-1-26fb.onrender.com/doctor/all");
       setDoctors(res1.data);
 
       toast.info("Changes Updated!!");

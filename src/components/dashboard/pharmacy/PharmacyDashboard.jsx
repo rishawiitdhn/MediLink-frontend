@@ -16,7 +16,6 @@ import { SiTicktick } from "react-icons/si";
 import SearchIcon from "@mui/icons-material/Search";
 
 const pharmacyId = localStorage.getItem("userId");
-const role = localStorage.getItem("role");
 export default function PharmacyDashboard() {
   const [open, setOpen] = useState(false);
   const [prescriptions, setPrescriptions] = useState([]);
@@ -24,6 +23,7 @@ export default function PharmacyDashboard() {
   let [searchVal, setSearchVal] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [pharmacy, setPharmacy] = useState({});
+  const [role, setRole] = useState();
 
   const [isLoaded, setIsLoaded] = useState(false);
 
@@ -35,9 +35,10 @@ export default function PharmacyDashboard() {
   useEffect(() => {
     const getAllPrescriptions = async () => {
       try {
+        const role = localStorage.getItem("role");
         setIsLoaded(true);
         const res = await axios.get(
-          `http://localhost:3000/pharmacy/prescriptions/${pharmacyId}`,
+          `https://medilink-backend-1-26fb.onrender.com/pharmacy/prescriptions/${pharmacyId}`,
         {
           headers: {
             Authorization: `Bearer ${role}`
@@ -45,7 +46,7 @@ export default function PharmacyDashboard() {
         }
         );
         setPrescriptions(res.data);
-        const res2 = await axios.get(`http://localhost:3000/pharmacy/pharmacy/${pharmacyId}`);
+        const res2 = await axios.get(`https://medilink-backend-1-26fb.onrender.com/pharmacy/pharmacy/${pharmacyId}`);
         setPharmacy(res2.data);
         setIsLoaded(false);
       } catch (err) {
@@ -61,8 +62,9 @@ export default function PharmacyDashboard() {
 
   const handlePrescriptionStatus = async () => {
     try {
+      const role = localStorage.getItem("role");
       const res = await axios.patch(
-        `http://localhost:3000/pharmacy/${prescription._id}`,{},
+        `https://medilink-backend-1-26fb.onrender.com/pharmacy/${prescription._id}`,{},
         {
           headers: {
             Authorization: `Bearer ${role}`

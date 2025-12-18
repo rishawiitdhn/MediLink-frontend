@@ -38,10 +38,10 @@ export default function ViewPatient() {
     const getPatient = async () => {
       try {
         const res = await axios.get(
-          `http://localhost:3000/patient/${patientId}`
+          `https://medilink-backend-1-26fb.onrender.com/patient/${patientId}`
         );
         const res1 = await axios.get(
-          `http://localhost:3000/doctor/${doctorId}`
+          `https://medilink-backend-1-26fb.onrender.com/doctor/${doctorId}`
         );
         setPatient(res.data);
         setDoctor(res1.data);
@@ -75,7 +75,7 @@ export default function ViewPatient() {
     try {
       setIsUploading(true);
       const res = await axios.post(
-        `http://localhost:3000/doctor/report/${patientId}`,
+        `https://medilink-backend-1-26fb.onrender.com/doctor/report/${patientId}`,
         formData,
         {
           headers: {
@@ -104,7 +104,7 @@ export default function ViewPatient() {
   const handleCompletedAppointment = async () => {
     try {
       const res = await axios.post(
-        "http://localhost:3000/doctor/completedAppointment",
+        "https://medilink-backend-1-26fb.onrender.com/doctor/completedAppointment",
         {
           patientId: patient._id,
           doctorId: doctorId,

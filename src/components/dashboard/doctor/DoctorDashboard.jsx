@@ -12,7 +12,6 @@ import Paper from "@mui/material/Paper";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
-const role = localStorage.getItem("role");
 export default function DoctorDashboard() {
   // const location = useLocation();
   const navigate = useNavigate();
@@ -20,11 +19,13 @@ export default function DoctorDashboard() {
   const [doctor, setDoctor] = useState({});
 
   const doctorId = localStorage.getItem("userId");
+  
   useEffect(() => {
     const getTodayAppointments = async () => {
+      const role = localStorage.getItem("role");
       try {
         const res = await axios.get(
-          `http://localhost:3000/doctor/appointments/${doctorId}`,
+          `https://medilink-backend-1-26fb.onrender.com/doctor/appointments/${doctorId}`,
         {
           headers: {
             Authorization: `Bearer ${role}`,
@@ -39,8 +40,8 @@ export default function DoctorDashboard() {
           "Error during fetching today's doctor appointments: ",
           err
         );
-        if (err.response && err.response.message) {
-          toast.error(err.response.message);
+        if (err.response && err.response.data.message) {
+          toast.error(err.response.data.message);
         } else toast.error("Something went wrong!!");
       }
     };
@@ -51,7 +52,7 @@ export default function DoctorDashboard() {
   useEffect(() => {
     const getDoctorById = async () => {
       try {
-        const res = await axios.get(`http://localhost:3000/doctor/${doctorId}`);
+        const res = await axios.get(`https://medilink-backend-1-26fb.onrender.com/doctor/${doctorId}`);
         setDoctor(res.data);
         console.log(res.data);
       } catch (err) {

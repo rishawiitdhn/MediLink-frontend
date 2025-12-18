@@ -19,7 +19,6 @@ import axios from "axios";
 import { useParams } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 
-const role = localStorage.getItem("role");
 export default function Prescription() {
   const doctorId = localStorage.getItem("userId");
   const {patientId} = useParams();
@@ -27,18 +26,19 @@ export default function Prescription() {
   const [items, setItems] = useState([""]);
   const [doctor, setDoctor] = useState({});
   const [pharmacies, setPharmacies] = useState([]);
+  const [role, setRole] = useState();
 
   const navigate = useNavigate();
 
   useEffect(() => {
     const getDoctorById = async () => {
       try {
-        const res = await axios.get(`http://localhost:3000/doctor/${doctorId}`);
+        const res = await axios.get(`https://medilink-backend-1-26fb.onrender.com/doctor/${doctorId}`);
         setDoctor(res.data);
       } catch (err) {
         console.error("Error during fetching doctor by ID: ", err);
-        if (err.response && err.response.message) {
-          toast.error(err.response.message);
+        if (err.response && err.response.data.message) {
+          toast.error(err.response.data.message);
         } else toast.error("Something went wrong!!");
       }
     };
@@ -47,16 +47,18 @@ export default function Prescription() {
   }, []);
 
   useEffect(() => {
+    const roleFromStorage = localStorage.getItem("role");
+    setRole(roleFromStorage);
     const getPharmacies = async () => {
       try {
         const res = await axios.get(
-          `http://localhost:3000/pharmacy/${doctor?.hospital?._id}`
+          `https://medilink-backend-1-26fb.onrender.com/pharmacy/${doctor?.hospital?._id}`
         );
         setPharmacies(res.data);
       } catch (err) {
         console.error("Error during fetching pharmacies: ", err);
-        if (err.response && err.response.message) {
-          toast.error(err.response.message);
+        if (err.response && err.response.data.message) {
+          toast.error(err.response.data.message);
         } else toast.error("Something went wrong!!");
       }
     };
@@ -98,7 +100,7 @@ export default function Prescription() {
 
     try {
         const res = await axios.post(
-          `http://localhost:3000/doctor/prescription`,
+          `https://medilink-backend-1-26fb.onrender.com/doctor/prescription`,
           {
             patientId,
             hospitalId: doctor.hospital._id,

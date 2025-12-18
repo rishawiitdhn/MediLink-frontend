@@ -33,13 +33,13 @@ export default function DoctorView({ doctorList, hospitalId }) {
     try {
       console.log(id);
       const res = await axios.patch(
-        `http://localhost:3000/admin/doctor/approve/${id}`, {}, {
+        `https://medilink-backend-1-26fb.onrender.com/admin/doctor/approve/${id}`, {}, {
           headers: {
             Authorization: `Bearer ${role}`,
           },
         }
       );
-      const res1 = await axios.get(`http://localhost:3000/doctor/hospital/${hospitalId}`);
+      const res1 = await axios.get(`https://medilink-backend-1-26fb.onrender.com/doctor/hospital/${hospitalId}`);
       setDoctors(res1.data);
 
       toast.success("Verified!!");
@@ -54,7 +54,7 @@ export default function DoctorView({ doctorList, hospitalId }) {
   const disapproveDoctors = async (id) => {
     try {
       const res = await axios.patch(
-        `http://localhost:3000/admin/doctor/disapprove/${id}`, {},
+        `https://medilink-backend-1-26fb.onrender.com/admin/doctor/disapprove/${id}`, {},
         {
           headers: {
             Authorization: `Bearer ${role}`,
@@ -62,7 +62,7 @@ export default function DoctorView({ doctorList, hospitalId }) {
         }
       );
 
-      const res1 = await axios.get(`http://localhost:3000/doctor/hospital/${hospitalId}`);
+      const res1 = await axios.get(`https://medilink-backend-1-26fb.onrender.com/doctor/hospital/${hospitalId}`);
       setDoctors(res1.data);
 
       toast.info("Changes Updated!!");

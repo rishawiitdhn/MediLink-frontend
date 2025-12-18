@@ -16,7 +16,7 @@ export default function Hospitals() {
   useEffect(() => {
     const getAllHospitals = async () => {
       try {
-        const res = await axios.get("http://localhost:3000/admin/hospitals", {
+        const res = await axios.get("https://medilink-backend-1-26fb.onrender.com/admin/hospitals", {
           headers: {
             Authorization: `Bearer ${role}`,
           },

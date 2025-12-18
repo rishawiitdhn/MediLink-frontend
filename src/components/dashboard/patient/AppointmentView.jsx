@@ -24,7 +24,7 @@ export default function AppointmentView() {
     const getPatientAppointments = async () => {
       try {
         const res = await axios.get(
-          `http://localhost:3000/patient/appointments/${patientId}`
+          `https://medilink-backend-1-26fb.onrender.com/patient/appointments/${patientId}`
         );
         setAppointments(res.data);
         console.log(res.data);
@@ -50,7 +50,7 @@ export default function AppointmentView() {
   const handleDeleteAppointment = async () => {
     try {
       const res = await axios.delete(
-        `http://localhost:3000/patient/appointment/${selectedAppointment._id}`,
+        `https://medilink-backend-1-26fb.onrender.com/patient/appointment/${selectedAppointment._id}`,
         {
           headers: {
             Authorization: `Bearer ${role}`

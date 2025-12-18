@@ -49,7 +49,7 @@ export default function HospitalView() {
     const getHospitalById = async () => {
       try {
         const res = await axios.get(
-          `http://localhost:3000/admin/hospitals/${hospitalId}`,
+          `https://medilink-backend-1-26fb.onrender.com/admin/hospitals/${hospitalId}`,
           {
             headers: {
               Authorization: `Bearer ${role}`,
@@ -74,7 +74,7 @@ export default function HospitalView() {
     try {
       setIsDeleting(true);
       const res = await axios.delete(
-        `http://localhost:3000/admin/hospitals/${id}`,
+        `https://medilink-backend-1-26fb.onrender.com/admin/hospitals/${id}`,
         {
           headers: {
             Authorization: `Bearer ${role}`,
