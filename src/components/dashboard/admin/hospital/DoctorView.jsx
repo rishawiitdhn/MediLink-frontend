@@ -1,0 +1,156 @@
+import { useEffect, useState } from "react";
+import { toast } from "react-toastify";
+import axios from "axios";
+import { IoMdCheckmarkCircle } from "react-icons/io";
+import SearchIcon from "@mui/icons-material/Search";
+
+export default function DoctorView({ doctorList, hospitalId }) {
+  const [doctors, setDoctors] = useState(doctorList);
+  const [searchVal, setSearchVal] = useState("");
+  const [searchResults, setSearchResults] = useState([]);
+
+   const role = localStorage.getItem("role");
+
+  //search doctors logic
+  useEffect(() => {
+    if (searchVal === "") {
+      setSearchResults(doctors);
+    } else {
+      let filterDoctors = doctors.filter(
+        (doctor) =>
+          doctor.name.toLowerCase().includes(searchVal.toLowerCase()) ||
+          doctor.specialisation.toLowerCase().includes(searchVal.toLowerCase())
+      );
+      setSearchResults(filterDoctors);
+    }
+  }, [searchVal, doctors]);
+
+  const handleChange = (e) => {
+    setSearchVal(e.target.value);
+  };
+
+  const approveDoctors = async (id) => {
+    try {
+      console.log(id);
+      const res = await axios.patch(
+        `http://localhost:3000/admin/doctor/approve/${id}`, {}, {
+          headers: {
+            Authorization: `Bearer ${role}`,
+          },
+        }
+      );
+      const res1 = await axios.get(`http://localhost:3000/doctor/hospital/${hospitalId}`);
+      setDoctors(res1.data);
+
+      toast.success("Verified!!");
+    } catch (err) {
+      console.log("Error during approving doctor: ", err);
+      if (err.response && err.response.data) {
+        toast.error(err.response.data.message);
+      } else toast.error("Some error occured. Please try again later!");
+    }
+  };
+
+  const disapproveDoctors = async (id) => {
+    try {
+      const res = await axios.patch(
+        `http://localhost:3000/admin/doctor/disapprove/${id}`, {},
+        {
+          headers: {
+            Authorization: `Bearer ${role}`,
+          },
+        }
+      );
+
+      const res1 = await axios.get(`http://localhost:3000/doctor/hospital/${hospitalId}`);
+      setDoctors(res1.data);
+
+      toast.info("Changes Updated!!");
+    } catch (err) {
+      console.log("Error during disapproving doctor: ", err);
+      if (err.response && err.response.data) {
+        toast.error(err.response.data.message);
+      } else toast.error("Some error occured. Please try again later!");
+    }
+  };
+
+  return (
+    <>
+      <div className="flex justify-center pt-10 relative z-10 bg-white">
+        <div className="search relative flex flex-col sm:flex-row items-center sm:items-stretch justify-center gap-2 w-full sm:w-3/4 md:w-2/3 lg:w-1/2 mx-auto p-2">
+          {/* Search box wrapper */}
+          <div className="relative grow w-full">
+            <SearchIcon className="absolute top-3 left-2 text-gray-500" />
+            <input
+              type="text"
+              placeholder="Search for doctors, specialisation..."
+              className="pl-8 pr-3 py-2 bg-gray-100 rounded-md border border-none w-full focus:outline-none focus:ring-2 focus:ring-blue-400"
+              onChange={handleChange}
+              value={searchVal}
+            />
+          </div>
+
+          {/* Button */}
+          <button className=" bg-blue-500 text-white font-medium rounded-md hover:bg-blue-600 transition duration-200 p-1 w-full sm:w-30">
+            Search
+          </button>
+        </div>
+      </div>
+
+      {/* Doctors Lists */}
+      <div className="doctorsList bg-white">
+        <h1 className="text-2xl md:text-3xl font-semibold text-gray-700 text-center pt-5">
+          Featured Doctors
+        </h1>
+        <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 m-3">
+          {searchResults && searchResults.map((doctor) => {
+            return (
+              <div
+                key={doctor._id}
+                className="card shadow-2xl p-5 flex-col gap-5 justify-center m-3 rounded-lg bg-blue-50"
+              >
+                <div className="flex justify-center">
+                  <img
+                    src="https://cdn-icons-png.flaticon.com/512/8815/8815112.png"
+                    alt="doctor_img"
+                    className="w-20 h-20 rounded-full self-center"
+                  />
+                </div>
+                <div className="details mt-2">
+                  <p className="font-semibold text-center text-lg">
+                    Dr. {doctor.name}
+                  </p>
+                  <p className="text-gray-600 text-center">
+                    {doctor.specialisation}
+                  </p>
+                  <div className="flex justify-end">
+                    <button
+                      onClick={
+                        doctor.verified === false
+                          ? () => approveDoctors(doctor._id)
+                          : () => disapproveDoctors(doctor._id)
+                      }
+                      className={`px-4 py-1 text-white rounded-lg hover:cursor-pointer font-semibold mt-2 ${
+                        doctor.verified === true
+                          ? "bg-green-500 hover:bg-green-600 transition"
+                          : "bg-red-500 hover:bg-red-600 transition"
+                      }`}
+                    >
+                      {doctor.verified === true ? (
+                        <p className="flex items-center gap-2">
+                          Verified <IoMdCheckmarkCircle />{" "}
+                        </p>
+                      ) : (
+                        "Approve"
+                      )}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </>
+  );
+}

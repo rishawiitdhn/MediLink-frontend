@@ -1,0 +1,13 @@
+@import "tailwindcss";
+:root {
+  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif, Inter;
+  h1,
+  h2,
+  h3 {
+    font-family: "Poppins", sans-serif;
+  }
+  
+}
+body{
+  background-color: aliceblue;
+}
