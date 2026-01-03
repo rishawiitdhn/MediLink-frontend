@@ -21,9 +21,7 @@ const options = [
 
 export default function UpdateHospital() {
   const navigate = useNavigate();
-
   const role = localStorage.getItem("role");
-
   const { hospitalId } = useParams();
   const [hospital, setHospital] = useState({});
   const {
@@ -37,7 +35,7 @@ export default function UpdateHospital() {
   const onSubmit = async (data) => {
     try {
       const formData = new FormData();
-      
+
       formData.append("name", data.name);
       formData.append("email", data.email);
       formData.append("address", data.address);
@@ -49,7 +47,8 @@ export default function UpdateHospital() {
       });
 
       const res = await axios.patch(
-        `https://medilink-backend-1-26fb.onrender.com/admin/hospitals/${hospital._id}`, formData,
+        `https://medilink-backend-1-26fb.onrender.com/admin/hospitals/${hospital._id}`,
+        formData,
         {
           headers: {
             Authorization: `Bearer ${role}`,
@@ -220,10 +219,14 @@ export default function UpdateHospital() {
           <button
             type="submit"
             disabled={isSubmitting}
-            className={`px-4 py-2 mt-4 bg-blue-600 text-white rounded-lg transition hover:bg-blue-700 hover:${isSubmitting ? "cursor-not-allowed" : "cursor-pointer"}
+            className={`px-4 py-2 mt-4 bg-blue-600 text-white rounded-lg transition hover:bg-blue-700 hover:${
+              isSubmitting
+                ? "cursor-not-allowed opacity-50"
+                : "cursor-pointer opacity-100"
+            }
               }`}
           >
-            Update
+            {isSubmitting ? <p>Updating please wait...</p> : <p>Update</p> }
           </button>
         </form>
       </div>

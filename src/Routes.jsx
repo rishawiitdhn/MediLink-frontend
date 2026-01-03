@@ -17,21 +17,15 @@ import ViewPatient from "./components/dashboard/doctor/ViewPatient";
 import Prescription from "./components/dashboard/doctor/Prescription";
 import NotAuthorised from "./components/NotAuthorised";
 import NotFound from "./components/NotFound";
-import CircularProgress from '@mui/material/CircularProgress';
 
-const role = localStorage.getItem("role");
 
 const ProjectRoutes = () => {
   const { currUser, setCurrUser } = useAuth();
-  const [loading, setLoading] = useState(true);
-  const [role, setRole] = useState();
+  const [role, setRole] = useState(()=>localStorage.getItem("role"));
   const navigate = useNavigate();
-
   useEffect(() => {
     const userIdFromStorage = localStorage.getItem("userId");
     const roleFromStorage = localStorage.getItem("role");
-    setRole(roleFromStorage);
-    setLoading(false);
     if (
       !userIdFromStorage &&
       !["/login", "/signup", "/"].includes(window.location.pathname)
@@ -41,12 +35,10 @@ const ProjectRoutes = () => {
 
     if (userIdFromStorage && !currUser) {
       setCurrUser(userIdFromStorage);
+      setRole(roleFromStorage);
     }
-  }, [currUser, setCurrUser]);
+  }, [currUser, setCurrUser, navigate]);
 
-  if (loading) {
-    return <CircularProgress size="3rem" />
-  }
   const element = useRoutes([
     {
       path: "/",

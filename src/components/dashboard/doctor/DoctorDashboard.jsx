@@ -11,30 +11,32 @@ import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import CircularProgress from "@mui/material/CircularProgress";
 
 export default function DoctorDashboard() {
-  // const location = useLocation();
   const navigate = useNavigate();
   const [todayAppointments, setTodayAppointments] = useState([]);
   const [doctor, setDoctor] = useState({});
+  const [isLoading, setIsLoading] = useState(false);
 
   const doctorId = localStorage.getItem("userId");
-  
+
   useEffect(() => {
     const getTodayAppointments = async () => {
       const role = localStorage.getItem("role");
       try {
+        setIsLoading(true);
         const res = await axios.get(
           `https://medilink-backend-1-26fb.onrender.com/doctor/appointments/${doctorId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${role}`,
-          },
-        }
+          {
+            headers: {
+              Authorization: `Bearer ${role}`,
+            },
+          }
         );
         const appts = res.data.filter((appt) => appt.isDone === false);
         setTodayAppointments(appts);
-        console.log(appts);
+        setIsLoading(false);
       } catch (err) {
         console.error(
           "Error during fetching today's doctor appointments: ",
@@ -52,9 +54,12 @@ export default function DoctorDashboard() {
   useEffect(() => {
     const getDoctorById = async () => {
       try {
-        const res = await axios.get(`https://medilink-backend-1-26fb.onrender.com/doctor/${doctorId}`);
+        setIsLoading(true);
+        const res = await axios.get(
+          `https://medilink-backend-1-26fb.onrender.com/doctor/${doctorId}`
+        );
         setDoctor(res.data);
-        console.log(res.data);
+        setIsLoading(false);
       } catch (err) {
         console.error("Error during fetching doctor details: ", err);
         if (err.response && err.response.message) {
@@ -65,6 +70,14 @@ export default function DoctorDashboard() {
     getDoctorById();
   }, []);
 
+  if (isLoading)
+    return (
+      <>
+        <div className="flex justify-center items-center h-full min-h-screen">
+          <CircularProgress size="3rem" />
+        </div>
+      </>
+    );
   return (
     <>
       <div className="min-h-screen flex flex-col">
@@ -72,12 +85,15 @@ export default function DoctorDashboard() {
         <Navbar />
 
         {/* Main content */}
-        {!(doctor.verified) && <div className="p-6 flex justify-center bg-linear-to-br from-blue-50 to-blue-100 rounded-3xl shadow-lg">
-          <p className="text-center text-red-700 p-3 text-xl shadow-xl w-fit font-semibold rounded-lg border-blue-700 border-2">
-                  Sorry, You are not verified till now!!
-                </p>
-        </div>}
-          {(doctor.verified) && <div className="p-6 bg-linear-to-br from-blue-50 to-blue-100 rounded-3xl shadow-lg">
+        {!doctor.verified && (
+          <div className="p-6 flex justify-center bg-linear-to-br from-blue-50 to-blue-100 rounded-3xl shadow-lg">
+            <p className="text-center text-red-700 p-3 text-xl shadow-xl w-fit font-semibold rounded-lg border-blue-700 border-2">
+              Sorry, You are not verified till now!!
+            </p>
+          </div>
+        )}
+        {doctor.verified && (
+          <div className="p-6 bg-linear-to-br from-blue-50 to-blue-100 rounded-3xl shadow-lg">
             <h1 className="text-2xl font-bold text-blue-700 mb-5">
               Today's Appointments
             </h1>
@@ -176,7 +192,7 @@ export default function DoctorDashboard() {
               </TableContainer>
             )}
           </div>
-        }
+        )}
         {/* --- Footer --- */}
         <div className="mt-auto bg-blue-950">
           <hr className="border-2"></hr>

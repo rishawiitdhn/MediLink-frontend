@@ -10,6 +10,7 @@ import { useNavigate } from "react-router-dom";
 import Footer from "../Footer";
 import SearchIcon from "@mui/icons-material/Search";
 import { toast } from "react-toastify";
+import CircularProgress from '@mui/material/CircularProgress';
 
 export default function NormalDashboard() {
   const navigate = useNavigate();
@@ -20,21 +21,31 @@ export default function NormalDashboard() {
   const [doctors, setDoctors] = useState([]);
   const [searchVal, setSearchVal] = useState("");
   const [searchResults, setSearchResults] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const getData = async () => {
-      const res1 = await axios.get("https://medilink-backend-1-26fb.onrender.com/doctor/all");
+      const res1 = await axios.get(
+        "https://medilink-backend-1-26fb.onrender.com/doctor/all"
+      );
       setDoctorCount(res1.data.length);
       setDoctors(res1.data);
 
-      const res2 = await axios.get("https://medilink-backend-1-26fb.onrender.com/pharmacy/all");
+      const res2 = await axios.get(
+        "https://medilink-backend-1-26fb.onrender.com/pharmacy/all"
+      );
       setPharmacyCount(res2.data.length);
 
-      const res3 = await axios.get("https://medilink-backend-1-26fb.onrender.com/patient/all");
+      const res3 = await axios.get(
+        "https://medilink-backend-1-26fb.onrender.com/patient/all"
+      );
       setPatientCount(res3.data.length);
 
-      const res4 = await axios.get("https://medilink-backend-1-26fb.onrender.com/admin/hospitals");
+      const res4 = await axios.get(
+        "https://medilink-backend-1-26fb.onrender.com/admin/hospitals"
+      );
       setHospitalCount(res4.data.length);
+      setIsLoading(false);
     };
 
     getData();
@@ -67,6 +78,15 @@ export default function NormalDashboard() {
       navigate("/login");
     }
   };
+
+  if (isLoading)
+    return (
+      <>
+        <div className="flex justify-center items-center min-h-screen">
+          <CircularProgress size="3rem" />
+        </div>
+      </>
+    );
 
   return (
     <>

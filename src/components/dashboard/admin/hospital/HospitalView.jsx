@@ -13,8 +13,8 @@ import { toast } from "react-toastify";
 import axios from "axios";
 import DoctorView from "./DoctorView";
 import React from "react";
-import LinearProgress from "@mui/material/LinearProgress";
 import { useNavigate } from "react-router-dom";
+import CircularProgress from "@mui/material/CircularProgress";
 
 //for dialog box
 import Dialog from "@mui/material/Dialog";
@@ -32,6 +32,7 @@ export default function HospitalView() {
   const { hospitalId } = useParams();
   const [doctors, setDoctors] = useState([]);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   //for dialog box
   const [open, setOpen] = React.useState(false);
@@ -48,6 +49,7 @@ export default function HospitalView() {
   useEffect(() => {
     const getHospitalById = async () => {
       try {
+        setIsLoading(true);
         const res = await axios.get(
           `https://medilink-backend-1-26fb.onrender.com/admin/hospitals/${hospitalId}`,
           {
@@ -58,6 +60,7 @@ export default function HospitalView() {
         );
         setHospital(res.data);
         setDoctors(res.data.doctors);
+        setIsLoading(false);
       } catch (err) {
         console.error("Error fetching hospital: ", err);
         if (err.response && err.response.data) {
@@ -100,6 +103,14 @@ export default function HospitalView() {
     navigate(`/admin/hospital/update/${hospitalId}`);
   };
 
+  if (isLoading)
+    return (
+      <>
+        <div className="flex justify-center items-center min-h-screen">
+          <CircularProgress size="3rem" />
+        </div>
+      </>
+    );
   return (
     <>
       <Navbar />
@@ -109,7 +120,11 @@ export default function HospitalView() {
             <h1 className="font-bold text-3xl text-center m-2">
               {hospital.name}
             </h1>
-            <img src={hospital.image?.url} alt="hospital_image" className=" w-lg p-5" />
+            <img
+              src={hospital.image?.url}
+              alt="hospital_image"
+              className=" w-lg p-5"
+            />
             <hr className="mx-2" />
             <CardContent>
               <Typography gutterBottom variant="h6" component="div">
@@ -159,8 +174,12 @@ export default function HospitalView() {
                   <Button
                     variant="contained"
                     color="error"
+                    disabled={isDeleting}
                     onClick={() => handleDelete(hospital._id)}
                     autoFocus
+                    sx={{
+                      cursor: isDeleting ? "not-allowed" : "pointer",
+                    }}
                   >
                     Delete
                   </Button>

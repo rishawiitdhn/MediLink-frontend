@@ -8,8 +8,9 @@ export default function DoctorView({ doctorList, hospitalId }) {
   const [doctors, setDoctors] = useState(doctorList);
   const [searchVal, setSearchVal] = useState("");
   const [searchResults, setSearchResults] = useState([]);
+  const [isApproving, setIsApproving] = useState(false);
 
-   const role = localStorage.getItem("role");
+  const role = localStorage.getItem("role");
 
   //search doctors logic
   useEffect(() => {
@@ -31,17 +32,21 @@ export default function DoctorView({ doctorList, hospitalId }) {
 
   const approveDoctors = async (id) => {
     try {
-      console.log(id);
+      setIsApproving(true);
       const res = await axios.patch(
-        `https://medilink-backend-1-26fb.onrender.com/admin/doctor/approve/${id}`, {}, {
+        `https://medilink-backend-1-26fb.onrender.com/admin/doctor/approve/${id}`,
+        {},
+        {
           headers: {
             Authorization: `Bearer ${role}`,
           },
         }
       );
-      const res1 = await axios.get(`https://medilink-backend-1-26fb.onrender.com/doctor/hospital/${hospitalId}`);
+      const res1 = await axios.get(
+        `https://medilink-backend-1-26fb.onrender.com/doctor/hospital/${hospitalId}`
+      );
       setDoctors(res1.data);
-
+      setIsApproving(false);
       toast.success("Verified!!");
     } catch (err) {
       console.log("Error during approving doctor: ", err);
@@ -53,8 +58,10 @@ export default function DoctorView({ doctorList, hospitalId }) {
 
   const disapproveDoctors = async (id) => {
     try {
+      setIsApproving(true);
       const res = await axios.patch(
-        `https://medilink-backend-1-26fb.onrender.com/admin/doctor/disapprove/${id}`, {},
+        `https://medilink-backend-1-26fb.onrender.com/admin/doctor/disapprove/${id}`,
+        {},
         {
           headers: {
             Authorization: `Bearer ${role}`,
@@ -62,9 +69,11 @@ export default function DoctorView({ doctorList, hospitalId }) {
         }
       );
 
-      const res1 = await axios.get(`https://medilink-backend-1-26fb.onrender.com/doctor/hospital/${hospitalId}`);
+      const res1 = await axios.get(
+        `https://medilink-backend-1-26fb.onrender.com/doctor/hospital/${hospitalId}`
+      );
       setDoctors(res1.data);
-
+      setIsApproving(false);
       toast.info("Changes Updated!!");
     } catch (err) {
       console.log("Error during disapproving doctor: ", err);
@@ -103,52 +112,53 @@ export default function DoctorView({ doctorList, hospitalId }) {
           Featured Doctors
         </h1>
         <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 m-3">
-          {searchResults && searchResults.map((doctor) => {
-            return (
-              <div
-                key={doctor._id}
-                className="card shadow-2xl p-5 flex-col gap-5 justify-center m-3 rounded-lg bg-blue-50"
-              >
-                <div className="flex justify-center">
-                  <img
-                    src="https://cdn-icons-png.flaticon.com/512/8815/8815112.png"
-                    alt="doctor_img"
-                    className="w-20 h-20 rounded-full self-center"
-                  />
-                </div>
-                <div className="details mt-2">
-                  <p className="font-semibold text-center text-lg">
-                    Dr. {doctor.name}
-                  </p>
-                  <p className="text-gray-600 text-center">
-                    {doctor.specialisation}
-                  </p>
-                  <div className="flex justify-end">
-                    <button
-                      onClick={
-                        doctor.verified === false
-                          ? () => approveDoctors(doctor._id)
-                          : () => disapproveDoctors(doctor._id)
-                      }
-                      className={`px-4 py-1 text-white rounded-lg hover:cursor-pointer font-semibold mt-2 ${
-                        doctor.verified === true
-                          ? "bg-green-500 hover:bg-green-600 transition"
-                          : "bg-red-500 hover:bg-red-600 transition"
-                      }`}
-                    >
-                      {doctor.verified === true ? (
-                        <p className="flex items-center gap-2">
-                          Verified <IoMdCheckmarkCircle />{" "}
-                        </p>
-                      ) : (
-                        "Approve"
-                      )}
-                    </button>
+          {searchResults &&
+            searchResults.map((doctor) => {
+              return (
+                <div
+                  key={doctor._id}
+                  className="card shadow-2xl p-5 flex-col gap-5 justify-center m-3 rounded-lg bg-blue-50"
+                >
+                  <div className="flex justify-center">
+                    <img
+                      src="https://cdn-icons-png.flaticon.com/512/8815/8815112.png"
+                      alt="doctor_img"
+                      className="w-20 h-20 rounded-full self-center"
+                    />
+                  </div>
+                  <div className="details mt-2">
+                    <p className="font-semibold text-center text-lg">
+                      Dr. {doctor.name}
+                    </p>
+                    <p className="text-gray-600 text-center">
+                      {doctor.specialisation}
+                    </p>
+                    <div className="flex justify-end">
+                      <button
+                        onClick={
+                          doctor.verified === false
+                            ? () => approveDoctors(doctor._id)
+                            : () => disapproveDoctors(doctor._id)
+                        }
+                        className={`px-4 py-1 text-white rounded-lg font-semibold mt-2 ${
+                          doctor.verified === true
+                            ? "bg-green-500 hover:bg-green-600 transition"
+                            : "bg-red-500 hover:bg-red-600 transition"
+                        } ${isApproving ? "cursor-not-allowed opacity-50" : "cursor-pointer opacity-100"}`}
+                      >
+                        {doctor.verified === true ? (
+                          <p className="flex items-center gap-2">
+                            Verified <IoMdCheckmarkCircle />{" "}
+                          </p>
+                        ) : (
+                          "Approve"
+                        )}
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })}
         </div>
       </div>
     </>

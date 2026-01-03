@@ -8,10 +8,13 @@ export function useAuth(){
 
 export const AuthProvider = ({children}) => {
     const [currUser, setCurrUser] = useState(null); //null means no user is logged in
+    const [role, setRole] = useState(null);
 
     useEffect(()=>{
         const userId = localStorage.getItem("userId");
-        if(userId)setCurrUser(userId);
+        if(userId){
+            setCurrUser(userId);
+        }
     }, []);
 
     const value = {currUser, setCurrUser};

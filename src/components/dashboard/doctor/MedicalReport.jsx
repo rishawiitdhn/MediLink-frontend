@@ -1,3 +1,4 @@
+import CircularProgress from "@mui/material/CircularProgress";
 export default function MedicalReport({ patient }) {
   return (
     <>
@@ -17,10 +18,11 @@ export default function MedicalReport({ patient }) {
           )}
 
           <div className="space-y-3">
-            {patient?.medicalRecords?.length>0 && patient?.medicalRecords?.map((record) => (
-              <div
-                key={record._id}
-                className="
+            {patient?.medicalRecords?.length > 0 &&
+              patient?.medicalRecords?.map((record) => (
+                <div
+                  key={record._id}
+                  className="
                 flex flex-col sm:flex-row
                 items-start sm:items-center
                 justify-between
@@ -29,20 +31,20 @@ export default function MedicalReport({ patient }) {
                 rounded-lg
                 p-3 sm:px-6
               "
-              >
-                <p className="text-sm sm:text-lg font-semibold wrap-break-word">
-                  {record.description}
-                  <span className="block sm:inline text-gray-600">
-                    {" "}
-                    ({record.date.split("T")[0]})
-                  </span>
-                </p>
+                >
+                  <p className="text-sm sm:text-lg font-semibold wrap-break-word">
+                    {record.description}
+                    <span className="block sm:inline text-gray-600">
+                      {" "}
+                      ({record.date.split("T")[0]})
+                    </span>
+                  </p>
 
-                <a
-                  href={record.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="
+                  <a
+                    href={record.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="
                   bg-gray-200
                   px-3 py-1
                   rounded-lg
@@ -52,11 +54,11 @@ export default function MedicalReport({ patient }) {
                   transition
                   whitespace-nowrap
                 "
-                >
-                  See report
-                </a>
-              </div>
-            ))}
+                  >
+                    See report
+                  </a>
+                </div>
+              ))}
           </div>
         </div>
       </div>

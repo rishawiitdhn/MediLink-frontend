@@ -4,17 +4,23 @@ import { toast } from "react-toastify";
 import { MdEmail } from "react-icons/md";
 import { FaPhoneAlt } from "react-icons/fa";
 import { IoMdCheckmarkCircle } from "react-icons/io";
+import CircularProgress from "@mui/material/CircularProgress";
 
 const role = localStorage.getItem("role");
 export default function () {
   const [pharmacies, setPharmacies] = useState([]);
-  const [refresh, setRefresh] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isApproving, setIsApproving] = useState(false);
 
   useEffect(() => {
     const getAllPharmacies = async () => {
       try {
-        const res = await axios.get("https://medilink-backend-1-26fb.onrender.com/pharmacy/all");
+        setIsLoading(true);
+        const res = await axios.get(
+          "https://medilink-backend-1-26fb.onrender.com/pharmacy/all"
+        );
         setPharmacies(res.data);
+        setIsLoading(false);
       } catch (err) {
         console.error("Error during fetching all pharmacies: ", err);
         if (err.response && err.response.message) {
@@ -23,10 +29,11 @@ export default function () {
       }
     };
     getAllPharmacies();
-  }, [refresh]);
+  }, [isApproving]);
 
   const handleApprovePharmacies = async (pharmacyId) => {
     try {
+      setIsApproving(true);
       const res = await axios.patch(
         `https://medilink-backend-1-26fb.onrender.com/admin/pharmacy/${pharmacyId}`,
         {},
@@ -37,9 +44,10 @@ export default function () {
         }
       );
       console.log(res.data);
-      if(res.data.verified===true)toast.success(`${res.data.name} verified successfully!!`);
+      if (res.data.verified === true)
+        toast.success(`${res.data.name} verified successfully!!`);
       else toast.info(`Changes Updated!!`);
-      setRefresh(!refresh);
+      setIsApproving(false);
     } catch (err) {
       console.error("Error during fetching all pharmacies: ", err);
       if (err.response && err.response.message) {
@@ -47,6 +55,15 @@ export default function () {
       } else toast.error("Network error");
     }
   };
+
+  if (isLoading)
+    return (
+      <>
+        <div className="flex justify-center items-center h-full">
+          <CircularProgress size="3rem" />
+        </div>
+      </>
+    );
   return (
     <>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -67,7 +84,8 @@ export default function () {
                     {pharmacy.hospital?.name}
                   </p>
                   <p className="text-sm text-gray-600">
-                    {pharmacy.hospital?.address[0].toUpperCase()}{pharmacy.hospital?.address.slice(1)}
+                    {pharmacy.hospital?.address[0].toUpperCase()}
+                    {pharmacy.hospital?.address.slice(1)}
                   </p>
                 </div>
               </div>
@@ -87,12 +105,17 @@ export default function () {
 
               <div className="flex justify-end mt-5">
                 <button
+                  disabled={isApproving}
                   onClick={() => handleApprovePharmacies(pharmacy._id)}
                   className={`px-4 py-1.5 text-white rounded-lg font-semibold flex items-center gap-2 ${
                     pharmacy.verified
                       ? "bg-green-500 hover:bg-green-600"
                       : "bg-red-500 hover:bg-red-600"
-                  } transition`}
+                  } ${
+                    isApproving
+                      ? "cursor-not-allowed opacity-10"
+                      : "cursor-pointer opacity-100"
+                  }transition`}
                 >
                   {pharmacy.verified ? (
                     <>
@@ -101,6 +124,7 @@ export default function () {
                   ) : (
                     "Approve"
                   )}
+                  
                 </button>
               </div>
             </div>

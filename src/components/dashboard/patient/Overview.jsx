@@ -12,7 +12,7 @@ import { DemoContainer, DemoItem } from "@mui/x-date-pickers/internals/demo";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
-
+import CircularProgress from "@mui/material/CircularProgress";
 
 export default function Overview() {
   const [doctorCount, setDoctorCount] = useState(0);
@@ -25,6 +25,7 @@ export default function Overview() {
   const [searchResults, setSearchResults] = useState([]);
   const [refresh, setRefresh] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const [selectedDate, setSelectedDate] = useState(dayjs());
 
@@ -32,25 +33,53 @@ export default function Overview() {
   const role = localStorage.getItem("role");
   useEffect(() => {
     const getData = async () => {
-      const res1 = await axios.get("https://medilink-backend-1-26fb.onrender.com/doctor/all/verified");
+      setIsLoading(true);
+      const res1 = await axios.get(
+        "https://medilink-backend-1-26fb.onrender.com/doctor/all/verified"
+      );
       setDoctorCount(res1.data.length);
-      setDoctors(res1.data);
-      console.log(res1.data);
 
-      const res2 = await axios.get("https://medilink-backend-1-26fb.onrender.com/pharmacy/all");
+      const res2 = await axios.get(
+        "https://medilink-backend-1-26fb.onrender.com/pharmacy/all"
+      );
       setPharmacyCount(res2.data.length);
 
-      const res3 = await axios.get("https://medilink-backend-1-26fb.onrender.com/patient/all");
+      const res3 = await axios.get(
+        "https://medilink-backend-1-26fb.onrender.com/patient/all"
+      );
       setPatientCount(res3.data.length);
 
-      const res4 = await axios.get("https://medilink-backend-1-26fb.onrender.com/admin/hospitals");
+      const res4 = await axios.get(
+        "https://medilink-backend-1-26fb.onrender.com/admin/hospitals"
+      );
       setHospitalCount(res4.data.length);
-
-      const res5 = await axios.get(`https://medilink-backend-1-26fb.onrender.com/patient/${userId}`);
-      setPatient(res5.data);
+      setIsLoading(false);
     };
 
     getData();
+  }, []);
+
+  useEffect(() => {
+    const getDoctorAndPatientData = async () => {
+      try {
+        const res1 = await axios.get(
+          "https://medilink-backend-1-26fb.onrender.com/doctor/all/verified"
+        );
+        setDoctors(res1.data);
+
+        const res2 = await axios.get(
+          `https://medilink-backend-1-26fb.onrender.com/patient/${userId}`
+        );
+        setPatient(res2.data);
+      } catch (err) {
+        console.error("Error booking appointment: ", err);
+        if (err.response && err.response.data) {
+          toast.error(err.response.data.message);
+        } else toast.error("Something went wrong!!");
+      }
+    };
+
+    getDoctorAndPatientData();
   }, [refresh]);
 
   const handleChange = (e) => {
@@ -77,18 +106,18 @@ export default function Overview() {
     try {
       setIsSubmitting(true);
       const res = await axios.post(
-        `https://medilink-backend-1-26fb.onrender.com/patient/appointment/${userId}/${doctor._id}/${doctor.hospital._id}`, {
-          date: selectedDate.format("YYYY-MM-DD")
+        `https://medilink-backend-1-26fb.onrender.com/patient/appointment/${userId}/${doctor._id}/${doctor.hospital._id}`,
+        {
+          date: selectedDate.format("YYYY-MM-DD"),
         },
         {
           headers: {
-            Authorization: `Bearer ${role}`
-          }
+            Authorization: `Bearer ${role}`,
+          },
         }
       );
       setIsSubmitting(false);
       setRefresh((prev) => !prev);
-      // toast.success(res.data.message);
       if (res.data.type === "info") toast.info(res.data.message);
       if (res.data.type === "success") toast.success(res.data.message);
     } catch (err) {
@@ -99,13 +128,21 @@ export default function Overview() {
     }
   };
 
-
   const handleDateChange = (value) => {
     setSelectedDate(value);
     // const date = new Date(selectedDate).toISOString();
     // console.log(selectedDate.toISOString());
     // console.log(selectedDate.format("YYYY-MM-DD"));
-  }
+  };
+
+  if (isLoading)
+    return (
+      <>
+        <div className="flex justify-center items-center h-full">
+          <CircularProgress size="3rem" />
+        </div>
+      </>
+    );
   return (
     <>
       <div className="">
@@ -123,9 +160,8 @@ export default function Overview() {
                 value={searchVal}
               />
 
-
               {/* date picker */}
-              <div className="mt-2" >
+              <div className="mt-2">
                 <LocalizationProvider dateAdapter={AdapterDayjs}>
                   <DemoContainer
                     components={[
@@ -136,7 +172,11 @@ export default function Overview() {
                     ]}
                   >
                     <DemoItem label="Select Appointment Date">
-                      <DatePicker value={selectedDate} onChange={handleDateChange} defaultValue={dayjs()} />
+                      <DatePicker
+                        value={selectedDate}
+                        onChange={handleDateChange}
+                        defaultValue={dayjs()}
+                      />
                     </DemoItem>
                   </DemoContainer>
                 </LocalizationProvider>
@@ -233,16 +273,28 @@ export default function Overview() {
                       <button
                         onClick={() => handleAppointment(doctor)}
                         disabled={isSubmitting}
-                        className={`px-4 py-1 text-white rounded-lg font-semibold mt-2 ${isSubmitting ? "hover:cursor-not-allowed" : "hover:cursor-pointer"} ${
+                        className={`px-4 py-1 text-white rounded-lg font-semibold mt-2 ${
+                          isSubmitting
+                            ? "hover:cursor-not-allowed"
+                            : "hover:cursor-pointer"
+                        } ${
                           doctor.appointments.find(
-                            (appt) => (appt.patient === userId) && (appt.date.split("T")[0] === selectedDate.format("YYYY-MM-DD"))
+                            (appt) =>
+                              appt.patient === userId &&
+                              appt.date.split("T")[0] ===
+                                selectedDate.format("YYYY-MM-DD") &&
+                              appt.isDone === false
                           )
                             ? "bg-green-500 hover:bg-green-600 transition"
                             : "bg-blue-500 hover:bg-blue-600 transition"
                         }`}
                       >
                         {doctor.appointments.find(
-                          (appt) => (appt.patient === userId) && (appt.date.split("T")[0] === selectedDate.format("YYYY-MM-DD"))
+                          (appt) =>
+                            appt.patient === userId &&
+                            appt.date.split("T")[0] ===
+                              selectedDate.format("YYYY-MM-DD") &&
+                            appt.isDone === false
                         ) ? (
                           <p className="flex items-center gap-2">
                             Confirmed <IoMdCheckmarkCircle />{" "}

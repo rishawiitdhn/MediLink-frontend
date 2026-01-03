@@ -1,7 +1,7 @@
 import Footer from "../../Footer";
 import Navbar from "../../Navbar";
 import Modal from "@mui/material/Modal";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { toast } from "react-toastify";
 import axios from "axios";
 import Table from "@mui/material/Table";
@@ -14,6 +14,7 @@ import Paper from "@mui/material/Paper";
 import Button from "@mui/material/Button";
 import { SiTicktick } from "react-icons/si";
 import SearchIcon from "@mui/icons-material/Search";
+import CircularProgress from "@mui/material/CircularProgress";
 
 const pharmacyId = localStorage.getItem("userId");
 export default function PharmacyDashboard() {
@@ -23,9 +24,10 @@ export default function PharmacyDashboard() {
   let [searchVal, setSearchVal] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [pharmacy, setPharmacy] = useState({});
-  const [role, setRole] = useState();
+  const [isLoading, setIsLoading] = useState(false);
+  const [isDispensing, setIsDispensing] = useState(false);
 
-  const [isLoaded, setIsLoaded] = useState(false);
+  const isFirstRender = useRef(true);
 
   const handleOpen = (presc) => {
     setOpen(true);
@@ -35,20 +37,25 @@ export default function PharmacyDashboard() {
   useEffect(() => {
     const getAllPrescriptions = async () => {
       try {
+        if (isFirstRender.current) setIsLoading(true);
         const role = localStorage.getItem("role");
-        setIsLoaded(true);
         const res = await axios.get(
           `https://medilink-backend-1-26fb.onrender.com/pharmacy/prescriptions/${pharmacyId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${role}`
+          {
+            headers: {
+              Authorization: `Bearer ${role}`,
+            },
           }
-        }
         );
         setPrescriptions(res.data);
-        const res2 = await axios.get(`https://medilink-backend-1-26fb.onrender.com/pharmacy/pharmacy/${pharmacyId}`);
+        const res2 = await axios.get(
+          `https://medilink-backend-1-26fb.onrender.com/pharmacy/pharmacy/${pharmacyId}`
+        );
         setPharmacy(res2.data);
-        setIsLoaded(false);
+        if (isFirstRender.current) {
+          setIsLoading(false);
+          isFirstRender.current = false;
+        }
       } catch (err) {
         console.error("Error during fetching All prescriptions: ", err);
         if (err.response && err.response.message) {
@@ -63,15 +70,18 @@ export default function PharmacyDashboard() {
   const handlePrescriptionStatus = async () => {
     try {
       const role = localStorage.getItem("role");
+      setIsDispensing(true);
       const res = await axios.patch(
-        `https://medilink-backend-1-26fb.onrender.com/pharmacy/${prescription._id}`,{},
+        `https://medilink-backend-1-26fb.onrender.com/pharmacy/${prescription._id}`,
+        {},
         {
           headers: {
-            Authorization: `Bearer ${role}`
-          }
+            Authorization: `Bearer ${role}`,
+          },
         }
       );
       handleClose();
+      setIsDispensing(false);
       if (res.data.status === "pending") toast.info("Changes updated!");
       else toast.success("Medicines dispensed successfully");
     } catch (err) {
@@ -86,7 +96,7 @@ export default function PharmacyDashboard() {
   useEffect(() => {
     if (prescriptions.length > 0) {
       if (searchVal === "") {
-        setSearchResults(prescriptions);  
+        setSearchResults(prescriptions);
       } else {
         const query = searchVal.trim().toLowerCase();
         let filterPrescriptions = prescriptions.filter(
@@ -94,9 +104,7 @@ export default function PharmacyDashboard() {
             prescription.patient.name
               .toLowerCase()
               .includes(query.toLowerCase()) ||
-            prescription.doctor.name
-              .toLowerCase()
-              .includes(query.toLowerCase())
+            prescription.doctor.name.toLowerCase().includes(query.toLowerCase())
         );
         setSearchResults(filterPrescriptions);
       }
@@ -106,6 +114,15 @@ export default function PharmacyDashboard() {
   const handleChange = (e) => {
     setSearchVal(e.target.value);
   };
+
+  if (isLoading)
+    return (
+      <>
+        <div className="flex justify-center items-center h-full min-h-screen">
+          <CircularProgress size="3rem" />
+        </div>
+      </>
+    );
   return (
     <>
       <div className="min-h-screen flex flex-col">
@@ -135,132 +152,152 @@ export default function PharmacyDashboard() {
               </div>
             </div>
 
-            {!(isLoaded) && !(pharmacy.verified) && <div className="p-6 flex justify-center bg-linear-to-br from-blue-50 to-blue-100 rounded-3xl shadow-lg">
-          <p className="text-center text-red-700 p-3 text-xl shadow-xl w-fit font-semibold rounded-lg border-blue-700 border-2">
+            {!pharmacy.verified && (
+              <div className="p-6 flex justify-center bg-linear-to-br from-blue-50 to-blue-100 rounded-3xl shadow-lg">
+                <p className="text-center text-red-700 p-3 text-xl shadow-xl w-fit font-semibold rounded-lg border-blue-700 border-2">
                   Sorry, You are not verified till now!!
                 </p>
-        </div>}
+              </div>
+            )}
             {/* Modal */}
-            {(pharmacy.verified) && prescription.medicines && prescription.medicines.length > 0 && (
-              <Modal open={open} onClose={handleClose}>
-                <div className="m-5 sm:m-10 md:m-20 xl:m-50">
-                  <TableContainer
-                    component={Paper}
-                    className="rounded-2xl shadow-md border border-blue-200"
-                  >
-                    <Table
-                      sx={{ minWidth: 400 }}
-                      aria-label="appointments table"
+            {pharmacy.verified &&
+              prescription.medicines &&
+              prescription.medicines.length > 0 && (
+                <Modal open={open} onClose={handleClose}>
+                  <div className="m-5 sm:m-10 md:m-20 xl:m-50">
+                    <TableContainer
+                      component={Paper}
+                      className="rounded-2xl shadow-md border border-blue-200"
                     >
-                      <TableHead>
-                        <TableRow className="bg-blue-600">
-                          <TableCell align="left">
-                            <p className="text-white font-semibold text-lg pl-4">
-                              Medicine Name
-                            </p>
-                          </TableCell>
-                          <TableCell align="right">
-                            <p className="text-white font-semibold text-lg">
-                              Dose
-                            </p>
-                          </TableCell>
-                          <TableCell align="right">
-                            <p className="text-white font-semibold text-lg">
-                              Duration
-                            </p>
-                          </TableCell>
-                          <TableCell align="right">
-                            <p className="text-white font-semibold text-lg">
-                              Instruction
-                            </p>
-                          </TableCell>
-                          <TableCell align="right">
-                            <p className="text-white font-semibold text-lg">
-                              Doctor
-                            </p>
-                          </TableCell>
-                          <TableCell align="right">
-                            <p className="text-white font-semibold text-lg">
-                              Hospital
-                            </p>
-                          </TableCell>
-                        </TableRow>
-                      </TableHead>
-
-                      <TableBody>
-                        {prescription.medicines.map((medicine, index) => (
-                          <TableRow
-                            key={medicine._id}
-                            className={`${
-                              index % 2 === 0 ? "bg-blue-50" : "bg-white"
-                            } hover:bg-blue-100 transition-all`}
-                            sx={{
-                              "&:last-child td, &:last-child th": { border: 0 },
-                            }}
-                          >
-                            <TableCell
-                              component="th"
-                              scope="row"
-                              className="font-medium pl-4"
-                            >
-                              {medicine.name}
+                      <Table
+                        sx={{ minWidth: 400 }}
+                        aria-label="appointments table"
+                      >
+                        <TableHead>
+                          <TableRow className="bg-blue-600">
+                            <TableCell align="left">
+                              <p className="text-white font-semibold text-lg pl-4">
+                                Medicine Name
+                              </p>
                             </TableCell>
-
-                            <TableCell align="right" className="text-gray-700">
-                              {medicine.dose}
+                            <TableCell align="right">
+                              <p className="text-white font-semibold text-lg">
+                                Dose
+                              </p>
                             </TableCell>
-
-                            <TableCell align="right" className="text-gray-700">
-                              {medicine.duration}
+                            <TableCell align="right">
+                              <p className="text-white font-semibold text-lg">
+                                Duration
+                              </p>
                             </TableCell>
-
-                            <TableCell
-                              align="right"
-                              className="text-gray-700 font-medium"
-                            >
-                              {medicine.instruction}
+                            <TableCell align="right">
+                              <p className="text-white font-semibold text-lg">
+                                Instruction
+                              </p>
                             </TableCell>
-
-                            <TableCell
-                              align="right"
-                              className="text-gray-700 font-medium"
-                            >
-                              Dr. {prescription?.doctor?.name || ""}
+                            <TableCell align="right">
+                              <p className="text-white font-semibold text-lg">
+                                Doctor
+                              </p>
                             </TableCell>
-                            <TableCell
-                              align="right"
-                              className="text-gray-700 font-medium"
-                            >
-                              {prescription?.hospital?.name || ""}
+                            <TableCell align="right">
+                              <p className="text-white font-semibold text-lg">
+                                Hospital
+                              </p>
                             </TableCell>
                           </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </TableContainer>
-                  <div className="flex justify-end p-1 bg-white">
-                    <Button
-                      onClick={handlePrescriptionStatus}
-                      variant="contained"
-                      color={
-                        prescription.status === "dispensed"
-                          ? "success"
-                          : "warning"
-                      }
-                      sx={{ textTransform: "none" }}
-                    >
-                      {prescription.status === "dispensed" ? (
-                        <>
-                          Dispensed &nbsp; <SiTicktick />
-                        </>
-                      ) : (
-                        "Dispense"
-                      )}
-                    </Button>
+                        </TableHead>
+
+                        <TableBody>
+                          {prescription.medicines.map((medicine, index) => (
+                            <TableRow
+                              key={medicine._id}
+                              className={`${
+                                index % 2 === 0 ? "bg-blue-50" : "bg-white"
+                              } hover:bg-blue-100 transition-all`}
+                              sx={{
+                                "&:last-child td, &:last-child th": {
+                                  border: 0,
+                                },
+                              }}
+                            >
+                              <TableCell
+                                component="th"
+                                scope="row"
+                                className="font-medium pl-4"
+                              >
+                                {medicine.name}
+                              </TableCell>
+
+                              <TableCell
+                                align="right"
+                                className="text-gray-700"
+                              >
+                                {medicine.dose}
+                              </TableCell>
+
+                              <TableCell
+                                align="right"
+                                className="text-gray-700"
+                              >
+                                {medicine.duration}
+                              </TableCell>
+
+                              <TableCell
+                                align="right"
+                                className="text-gray-700 font-medium"
+                              >
+                                {medicine.instruction}
+                              </TableCell>
+
+                              <TableCell
+                                align="right"
+                                className="text-gray-700 font-medium"
+                              >
+                                Dr. {prescription?.doctor?.name || ""}
+                              </TableCell>
+                              <TableCell
+                                align="right"
+                                className="text-gray-700 font-medium"
+                              >
+                                {prescription?.hospital?.name || ""}
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </TableContainer>
+                    <div className="flex justify-end p-1 bg-white">
+                      <Button
+                        onClick={handlePrescriptionStatus}
+                        variant="contained"
+                        disabled={isDispensing}
+                        color={
+                          prescription.status === "dispensed"
+                            ? "success"
+                            : "warning"
+                        }
+                        sx={{ textTransform: "none" }}
+                      >
+                        {prescription.status === "dispensed" ? (
+                          <>
+                            Dispensed &nbsp; <SiTicktick />
+                          </>
+                        ) : (
+                          "Dispense"
+                        )}
+                        {isDispensing && (
+                          <CircularProgress
+                            size={20}
+                            sx={{ ml: 1 }}
+                            color="inherit"
+                          />
+                        )}
+                      </Button>
+                    </div>
                   </div>
-                </div>
-              </Modal>
-            )}
+                </Modal>
+              )}
 
             {pharmacy.verified && searchResults.length === 0 && (
               <div className="flex justify-center">

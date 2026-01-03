@@ -4,6 +4,7 @@ import { LiaHospitalSolid } from "react-icons/lia";
 import { BsCapsule } from "react-icons/bs";
 import { FaBedPulse } from "react-icons/fa6";
 import { useEffect, useState } from "react";
+import CircularProgress from '@mui/material/CircularProgress';
 
 export default function Overview() {
   const [doctorCount, setDoctorCount] = useState(0);
@@ -11,11 +12,13 @@ export default function Overview() {
   const [pharmacyCount, setPharmacyCount] = useState(0);
   const [patientCount, setPatientCount] = useState(0);
   const [doctors, setDoctors] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   const role = localStorage.getItem("role");
 
   useEffect(() => {
     const getData = async () => {
+      setIsLoading(true);
       const res1 = await axios.get("https://medilink-backend-1-26fb.onrender.com/doctor/all");
       setDoctorCount(res1.data.length);
       setDoctors(res1.data);
@@ -31,11 +34,19 @@ export default function Overview() {
             Authorization: `role ${role}`,
           }});
       setHospitalCount(res4.data.length);
+      setIsLoading(false);
     };
 
     getData();
   }, []);
 
+  if(isLoading)return (
+    <>
+    <div className="flex justify-center items-center h-full">
+      <CircularProgress size="3rem"/>
+    </div>
+    </>
+  )
   return (
     <>
       <div className="categories grid grid-cols-2 gap-5 justify-items-center mt-8 md:flex md:justify-center">

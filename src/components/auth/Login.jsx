@@ -147,10 +147,10 @@ export default function Login() {
             type="submit"
             disabled={!isRole || isSubmitting}
             className={`px-4 py-2 mt-4 bg-blue-600 text-white rounded-lg transition hover:bg-blue-700 ${
-              isRole ? "hover:cursor-pointer" : "cursor-not-allowed opacity-50"
+              (isRole || isSubmitting) ? "hover:cursor-pointer" : "cursor-not-allowed opacity-50"
             }`}
           >
-            Login
+            {isSubmitting ? <p>Logging in please wait...</p> : <p>Login</p>}
           </button>
 
           <div className="flex justify-center gap-2 border-3 rounded-md py-3 border-gray-300 text-md sm:text-lg mt-2">
@@ -165,14 +165,11 @@ export default function Login() {
             </p>
           </div>
         </form>
-        {/* <img
-          src={doctorImg}
-          alt="doctor_img"
-          className="h-120 w-90 absolute right-0 hidden md:flex md:right-1 lg:right-40 top-45"
-        /> */}
       </div>
-      <hr className="border-2 bg-gray-400 mt-5" />
-      <Footer />
+      <div className="flex flex-col">
+        <Footer />
+      </div>
+      
     </>
   );
 }

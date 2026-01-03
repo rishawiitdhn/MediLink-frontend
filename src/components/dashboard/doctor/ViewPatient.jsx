@@ -1,7 +1,7 @@
 import { useParams } from "react-router-dom";
 import Navbar from "../../Navbar";
 import Footer from "../../Footer";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { toast } from "react-toastify";
 import axios from "axios";
 import { MdEmail } from "react-icons/md";
@@ -9,6 +9,7 @@ import { FaPhoneAlt } from "react-icons/fa";
 import { FaHospital } from "react-icons/fa";
 import LinearProgress from "@mui/material/LinearProgress";
 import MedicalReport from "./MedicalReport";
+import { CircularProgress } from "@mui/material";
 
 //dialog import
 import * as React from "react";
@@ -31,12 +32,18 @@ export default function ViewPatient() {
   const [isUploading, setIsUploading] = useState(false);
   const [desc, setDesc] = useState("");
   const [open, setOpen] = React.useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isAppointmentCompleting, setIsAppointmentCompleting] = useState(false);
 
+  const isFirstRender = useRef(true);
   const navigate = useNavigate();
 
   useEffect(() => {
     const getPatient = async () => {
       try {
+        {
+          isFirstRender.current && setIsLoading(true);
+        }
         const res = await axios.get(
           `https://medilink-backend-1-26fb.onrender.com/patient/${patientId}`
         );
@@ -45,6 +52,8 @@ export default function ViewPatient() {
         );
         setPatient(res.data);
         setDoctor(res1.data);
+        setIsLoading(false);
+        isFirstRender.current = false;
       } catch (err) {
         console.error("Error during fetching doctor details: ", err);
         if (err.response && err.response.message) {
@@ -103,6 +112,7 @@ export default function ViewPatient() {
 
   const handleCompletedAppointment = async () => {
     try {
+      setIsAppointmentCompleting(true);
       const res = await axios.post(
         "https://medilink-backend-1-26fb.onrender.com/doctor/completedAppointment",
         {
@@ -116,6 +126,7 @@ export default function ViewPatient() {
         }
       );
       toast.success(res.data.message);
+      setIsAppointmentCompleting(false);
       navigate(`/`);
     } catch (err) {
       console.error(err);
@@ -132,6 +143,15 @@ export default function ViewPatient() {
   const handleClose = () => {
     setOpen(false);
   };
+
+  if (isLoading)
+    return (
+      <>
+        <div className="flex justify-center items-center h-full min-h-screen">
+          <CircularProgress size="3rem" />
+        </div>
+      </>
+    );
   return (
     <>
       <div className="min-h-screen flex flex-col">
@@ -194,9 +214,16 @@ export default function ViewPatient() {
                   variant="contained"
                   color="error"
                   onClick={handleCompletedAppointment}
-                  autoFocus
+                  disabled={isAppointmentCompleting}
                 >
                   YES
+                  {isAppointmentCompleting && (
+                    <CircularProgress
+                      size={20}
+                      sx={{ ml: 1 }}
+                      color="inherit"
+                    />
+                  )}
                 </Button>
               </DialogActions>
             </Dialog>
@@ -259,7 +286,7 @@ export default function ViewPatient() {
                 className="px-4 py-3 w-full max-w-sm bg-linear-to-br from-blue-600 to-blue-800 
                text-white font-semibold rounded-lg hover:bg-blue-700 transition 
                hover:cursor-pointer shadow-md"
-               onClick={()=>navigate(`/doctor/prescription/${patientId}`)}
+                onClick={() => navigate(`/doctor/prescription/${patientId}`)}
               >
                 Prescription
               </button>
@@ -268,7 +295,7 @@ export default function ViewPatient() {
         </div>
         <div className="flex flex-col lg:flex-row justify-center w-full">
           <MedicalReport patient={patient} />
-          <ViewPrescription patient={patient}/>
+          <ViewPrescription patient={patient} />
         </div>
         {/* --- Footer --- */}
         <div className="mt-auto bg-blue-950">

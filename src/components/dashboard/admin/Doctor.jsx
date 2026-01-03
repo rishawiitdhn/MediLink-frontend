@@ -3,17 +3,24 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import { IoMdCheckmarkCircle } from "react-icons/io";
 import SearchIcon from "@mui/icons-material/Search";
+import CircularProgress from "@mui/material/CircularProgress";
 
 export default function Doctor() {
   const [doctors, setDoctors] = useState([]);
   const [searchVal, setSearchVal] = useState("");
   const [searchResults, setSearchResults] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isApproving, setIsApproving] = useState(false);
 
   const role = localStorage.getItem("role");
   useEffect(() => {
     const getData = async () => {
-      const res1 = await axios.get("https://medilink-backend-1-26fb.onrender.com/doctor/all");
+      setIsLoading(true);
+      const res1 = await axios.get(
+        "https://medilink-backend-1-26fb.onrender.com/doctor/all"
+      );
       setDoctors(res1.data);
+      setIsLoading(false);
     };
 
     getData();
@@ -42,6 +49,7 @@ export default function Doctor() {
 
   const approveDoctors = async (id) => {
     try {
+      setIsApproving(true);
       const res = await axios.patch(
         `https://medilink-backend-1-26fb.onrender.com/admin/doctor/approve/${id}`,
         {},
@@ -51,9 +59,11 @@ export default function Doctor() {
           },
         }
       );
-      const res1 = await axios.get("https://medilink-backend-1-26fb.onrender.com/doctor/all");
+      const res1 = await axios.get(
+        "https://medilink-backend-1-26fb.onrender.com/doctor/all"
+      );
       setDoctors(res1.data);
-
+      setIsApproving(false);
       toast.success("Verified!!");
     } catch (err) {
       console.log("Error during approving doctor: ", err);
@@ -65,6 +75,7 @@ export default function Doctor() {
 
   const disapproveDoctors = async (id) => {
     try {
+      setIsApproving(true);
       const res = await axios.patch(
         `https://medilink-backend-1-26fb.onrender.com/admin/doctor/disapprove/${id}`,
         {},
@@ -75,9 +86,12 @@ export default function Doctor() {
         }
       );
 
-      const res1 = await axios.get("https://medilink-backend-1-26fb.onrender.com/doctor/all");
+      const res1 = await axios.get(
+        "https://medilink-backend-1-26fb.onrender.com/doctor/all"
+      );
       setDoctors(res1.data);
 
+      setIsApproving(false);
       toast.info("Changes Updated!!");
     } catch (err) {
       console.log("Error during disapproving doctor: ", err);
@@ -87,6 +101,14 @@ export default function Doctor() {
     }
   };
 
+  if (isLoading)
+    return (
+      <>
+        <div className="flex justify-center items-center h-full">
+          <CircularProgress size="3rem" />
+        </div>
+      </>
+    );
   return (
     <>
       <div className="flex justify-center mt-5 relative z-10">
@@ -141,16 +163,17 @@ export default function Doctor() {
                   </p>
                   <div className="flex justify-end">
                     <button
+                      disabled={isApproving}
                       onClick={
                         doctor.verified === false
                           ? () => approveDoctors(doctor._id)
                           : () => disapproveDoctors(doctor._id)
                       }
-                      className={`px-4 py-1 text-white rounded-lg hover:cursor-pointer font-semibold mt-2 ${
+                      className={`px-4 py-1 text-white rounded-lg font-semibold mt-2 ${
                         doctor.verified === true
                           ? "bg-green-500 hover:bg-green-600 transition"
                           : "bg-red-500 hover:bg-red-600 transition"
-                      }`}
+                      } {isApproving ? "cursor-not-allowed opacity-50" : "cursor-pointer opacity-100"}`}
                     >
                       {doctor.verified === true ? (
                         <p className="flex items-center gap-2">

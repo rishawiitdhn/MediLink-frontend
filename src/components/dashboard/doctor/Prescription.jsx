@@ -9,9 +9,7 @@ import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import Select from "@mui/material/Select";
 import { Controller } from "react-hook-form";
-import {
-  IconButton,
-} from "@mui/material";
+import { CircularProgress, IconButton } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { useState, useEffect } from "react";
 import { toast } from "react-toastify";
@@ -21,7 +19,7 @@ import { useNavigate } from "react-router-dom";
 
 export default function Prescription() {
   const doctorId = localStorage.getItem("userId");
-  const {patientId} = useParams();
+  const { patientId } = useParams();
 
   const [items, setItems] = useState([""]);
   const [doctor, setDoctor] = useState({});
@@ -33,7 +31,9 @@ export default function Prescription() {
   useEffect(() => {
     const getDoctorById = async () => {
       try {
-        const res = await axios.get(`https://medilink-backend-1-26fb.onrender.com/doctor/${doctorId}`);
+        const res = await axios.get(
+          `https://medilink-backend-1-26fb.onrender.com/doctor/${doctorId}`
+        );
         setDoctor(res.data);
       } catch (err) {
         console.error("Error during fetching doctor by ID: ", err);
@@ -99,23 +99,23 @@ export default function Prescription() {
     }
 
     try {
-        const res = await axios.post(
-          `https://medilink-backend-1-26fb.onrender.com/doctor/prescription`,
-          {
-            patientId,
-            hospitalId: doctor.hospital._id,
-            doctorId: doctor._id,
-            pharmacyName: data.pharmacy,
-            medicines,
-          },
+      const res = await axios.post(
+        `https://medilink-backend-1-26fb.onrender.com/doctor/prescription`,
+        {
+          patientId,
+          hospitalId: doctor.hospital._id,
+          doctorId: doctor._id,
+          pharmacyName: data.pharmacy,
+          medicines,
+        },
         {
           headers: {
             Authorization: `Bearer ${role}`,
           },
         }
-        );
-        toast.success(res.data.message);
-        navigate(`/doctor/${patientId}`);
+      );
+      toast.success(res.data.message);
+      navigate(`/doctor/${patientId}`);
     } catch (err) {
       console.error("Error during sumitting prescription: ", err);
       if (err.response && err.response.message) {
@@ -288,9 +288,12 @@ export default function Prescription() {
                 <div className="flex justify-center">
                   <button
                     type="submit"
-                    className="mt-4 bg-green-600 w-full sm:w-1/2 text-white py-3 text-lg font-semibold rounded-lg"
+                    className={`mt-4 bg-green-600 w-full sm:w-1/2 text-white py-3 text-lg font-semibold rounded-lg ${
+                      isSubmitting ? "cursor-not-allowed" : "cursor-pointer"
+                    }`}
+                    disabled={isSubmitting}
                   >
-                    Submit Prescription
+                    Submit Prescription {"  "} {isSubmitting && <CircularProgress size="20px"/> }
                   </button>
                 </div>
 

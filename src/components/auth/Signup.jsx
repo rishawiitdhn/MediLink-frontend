@@ -282,10 +282,10 @@ export default function Signup() {
             type="submit"
             disabled={!isRole || isSubmitting}
             className={`px-4 py-2 mt-4 bg-blue-600 text-white rounded-lg transition hover:bg-blue-700 ${
-              isRole ? "hover:cursor-pointer" : "cursor-not-allowed opacity-50"
+              (isRole || isSubmitting) ? "hover:cursor-pointer" : "cursor-not-allowed opacity-50"
             }`}
           >
-            Register
+            {isSubmitting ? <p>Registering please wait...</p> : <p>Register</p>}
           </button>
 
           <div className="flex justify-center gap-2 border-3 rounded-md py-3 border-gray-300 text-md sm:text-lg mt-2">

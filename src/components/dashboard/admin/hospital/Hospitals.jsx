@@ -3,6 +3,7 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import SearchIcon from "@mui/icons-material/Search";
 import { useNavigate } from "react-router-dom";
+import CircularProgress from '@mui/material/CircularProgress';
 
 export default function Hospitals() {
   const navigate = useNavigate();
@@ -12,17 +13,23 @@ export default function Hospitals() {
   const [hospitals, setHospitals] = useState([]);
   const [searchVal, setSearchVal] = useState("");
   const [searchResults, setSearchResults] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     const getAllHospitals = async () => {
       try {
-        const res = await axios.get("https://medilink-backend-1-26fb.onrender.com/admin/hospitals", {
-          headers: {
-            Authorization: `Bearer ${role}`,
-          },
-        });
+        setIsLoading(true);
+        const res = await axios.get(
+          "https://medilink-backend-1-26fb.onrender.com/admin/hospitals",
+          {
+            headers: {
+              Authorization: `Bearer ${role}`,
+            },
+          }
+        );
         // console.log(res);
         setHospitals(res.data);
+        setIsLoading(false);
       } catch (err) {
         console.error("Error fetching Hospitals: ", err);
       }
@@ -46,6 +53,14 @@ export default function Hospitals() {
     setSearchVal(e.target.value);
   };
 
+  if (isLoading)
+    return (
+      <>
+        <div className="flex justify-center items-center h-full">
+          <CircularProgress size="3rem" />
+        </div>
+      </>
+    );
   return (
     <>
       <div className="flex justify-center mt-5 relative z-10">

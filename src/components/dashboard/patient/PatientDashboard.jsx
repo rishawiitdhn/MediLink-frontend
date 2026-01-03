@@ -9,6 +9,7 @@ import Overview from "./Overview";
 import Navbar from "../../Navbar";
 import Footer from "../../Footer";
 import AppointmentView from "./AppointmentView";
+import CircularProgress from "@mui/material/CircularProgress";
 
 import MedicalReport from "../doctor/MedicalReport"
 import axios from "axios";
@@ -17,7 +18,6 @@ import { toast } from "react-toastify";
 
 const patientId = localStorage.getItem("userId");
 export default function PatientDashboard() {
-
   const [patient, setPatient] = useState({});
 
     const location = useLocation();
@@ -27,6 +27,7 @@ export default function PatientDashboard() {
   const [upcomingAppointments, setUpcomingAppointments] = useState(false);
   const [isMedicalRecords, setIsMedicalRecords] = useState(false);
   const [isPrescription, setIsPrescription] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   //handling patient dashboard
   const listItems = [
@@ -36,25 +37,15 @@ export default function PatientDashboard() {
     setIsPrescription,
   ];
 
-  // useEffect(()=>{
-  //   if((location.state) && (location.state.from==="AddHospital")){
-  //     setIsOverview(false);
-  //     setIsHospitals(true);
-  //   }
-  //   if((location.state) && (location.state.from==="deleteHospital")){
-  //     setIsOverview(false);
-  //     setIsHospitals(true);
-  //   }
-  // }, [location.state]);
-
    useEffect(() => {
     const getPatient = async () => {
       try {
+        setIsLoading(true);
         const res = await axios.get(
           `https://medilink-backend-1-26fb.onrender.com/patient/${patientId}`
         );
-        console.log(res.data);
         setPatient(res.data);
+        setIsLoading(false);
       } catch (err) {
         console.error("Error during fetching patient details: ", err);
         if (err.response && err.response.message) {
@@ -72,6 +63,14 @@ export default function PatientDashboard() {
       }
     };
 
+    if (isLoading)
+        return (
+          <>
+            <div className="flex justify-center items-center h-full min-h-screen">
+              <CircularProgress size="3rem" />
+            </div>
+          </>
+        );
   return (
     <>
       <div className="min-h-screen flex flex-col">

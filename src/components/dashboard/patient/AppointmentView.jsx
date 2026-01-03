@@ -1,5 +1,5 @@
 import SearchIcon from "@mui/icons-material/Search";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
 import * as React from "react";
@@ -9,6 +9,7 @@ import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
+import CircularProgress from "@mui/material/CircularProgress";
 
 export default function AppointmentView() {
   const [appointments, setAppointments] = useState([]);
@@ -17,17 +18,23 @@ export default function AppointmentView() {
   const [refresh, setRefresh] = useState(false);
   const [searchVal, setSearchVal] = useState("");
   const [searchResults, setSearchResults] = useState([]);
-
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const isFirstRender = useRef(true);
   const patientId = localStorage.getItem("userId");
   const role = localStorage.getItem("role");
+
   useEffect(() => {
     const getPatientAppointments = async () => {
       try {
+        if (isFirstRender.current) setIsLoading(true);
         const res = await axios.get(
           `https://medilink-backend-1-26fb.onrender.com/patient/appointments/${patientId}`
         );
-        setAppointments(res.data);
-        console.log(res.data);
+        const upcomingAppointments = res.data.filter((appt) => appt.isDone === false);
+        setAppointments(upcomingAppointments);
+        setIsLoading(false);
+        isFirstRender.current = false;
       } catch (err) {
         console.error("Error fetching patient appointments: ", err);
         if (err.response && err.response.data) {
@@ -49,14 +56,16 @@ export default function AppointmentView() {
 
   const handleDeleteAppointment = async () => {
     try {
+      setIsDeleting(true);
       const res = await axios.delete(
         `https://medilink-backend-1-26fb.onrender.com/patient/appointment/${selectedAppointment._id}`,
         {
           headers: {
-            Authorization: `Bearer ${role}`
-          }
+            Authorization: `Bearer ${role}`,
+          },
         }
       );
+      setIsDeleting(false);
       toast(res.data.message);
       handleClose();
       setRefresh(!refresh);
@@ -79,15 +88,24 @@ export default function AppointmentView() {
     } else {
       let filterAppointments = appointments.filter(
         (appt) =>
-          appt.doctor.name.toLowerCase().replace(/\s+/g, "").includes(searchVal.replace(/\s+/g, "").toLowerCase()) ||
-          appt.hospital.name
+          appt.doctor.name
             .toLowerCase()
-            .includes(searchVal.toLowerCase())
+            .replace(/\s+/g, "")
+            .includes(searchVal.replace(/\s+/g, "").toLowerCase()) ||
+          appt.hospital.name.toLowerCase().includes(searchVal.toLowerCase())
       );
       setSearchResults(filterAppointments);
     }
   }, [searchVal, appointments]);
 
+  if (isLoading)
+    return (
+      <>
+        <div className="flex justify-center items-center h-full">
+          <CircularProgress size="3rem" />
+        </div>
+      </>
+    );
   return (
     <>
       <h1 className="text-2xl md:text-3xl font-semibold text-gray-700 text-center pt-5">
@@ -133,9 +151,12 @@ export default function AppointmentView() {
           <Button
             variant="contained"
             onClick={handleDeleteAppointment}
-            autoFocus
+            disabled={isDeleting}
           >
-            Yes
+            Yes{" "}
+            {isDeleting && (
+              <CircularProgress size={20} sx={{ ml: 1 }} color="inherit" />
+            )}
           </Button>
         </DialogActions>
       </Dialog>
@@ -154,7 +175,7 @@ export default function AppointmentView() {
         </div>
       )}
 
-      {searchResults && searchResults.length == 0 && (searchVal!=="") && (
+      {searchResults && searchResults.length == 0 && searchVal !== "" && (
         <div className="flex justify-center">
           <p
             className="mt-8 px-10 py-3 text-lg font-semibold 
@@ -168,46 +189,45 @@ export default function AppointmentView() {
         </div>
       )}
       <div className="appointment-cards grid md:grid-cols-2 gap-5 mt-10">
-        {searchResults.length>0 && searchResults.map((appointment) => {
-          return (
-            <div
-              className="appointment-card drop-shadow-2xl bg-blue-100 p-3 pl-5 border border-gray-600 rounded-lg flex justify-between"
-              key={appointment._id}
-            >
-              <div>
-                <p className="text-xl font-bold">
-                  {appointment.date.split("T")[0]}
-                </p>
-                
-                <p className="text-lg font-semibold font-serif text-gray-800">
-                  Dr. {appointment.doctor.name}
-                </p>
+        {searchResults.length > 0 &&
+          searchResults.map((appointment) => {
+            return (
+              <div
+                className="appointment-card drop-shadow-2xl bg-blue-100 p-3 pl-5 border border-gray-600 rounded-lg flex justify-between"
+                key={appointment._id}
+              >
+                <div className="">
+                  <p className="text-xl font-bold wrap-break-word">
+                    {appointment.date.split("T")[0]}
+                  </p>
 
-                <p className="text-md font-medium font-serif text-gray-500">
-                  {/* {appointment?.doctor?.specialisation[0].toUpperCase()}{appointment?.doctor?.specialisation.slice(1)} */}
-                  {appointment.doctor.specialisation}
-                </p>
-                <p className="text-md font-semibold text-gray-600">
-                  ( {appointment.hospital.name} )
-                </p>
-              </div>
-              <div className="flex flex-col gap-2 justify-center items-center">
-                <button
-                  onClick={() => handleClickOpen(appointment)}
-                  className="px-6 py-2 bg-gray-300 text-black rounded-md hover:bg-gray-500 transition duration-300 hover:cursor-pointer font-semibold"
-                >
-                  Cancel
-                </button>
+                  <p className="text-lg font-semibold font-serif text-gray-800 wrap-break-word">
+                    Dr. {appointment.doctor.name}
+                  </p>
 
-                <p
-                  className="px-3 py-1 bg-yellow-500 text-black rounded-lg hover:bg-yellow-600 transition duration-300 font-semibold"
-                >
-                  Pending...
-                </p>
+                  <p className="text-md font-medium font-serif text-gray-500">
+                    {/* {appointment?.doctor?.specialisation[0].toUpperCase()}{appointment?.doctor?.specialisation.slice(1)} */}
+                    {appointment.doctor.specialisation}
+                  </p>
+                  <p className="text-md font-semibold text-gray-600">
+                    ( {appointment.hospital.name} )
+                  </p>
+                </div>
+                <div className="flex flex-col gap-2 justify-center items-center">
+                  <button
+                    onClick={() => handleClickOpen(appointment)}
+                    className="px-6 py-2 bg-gray-300 text-black rounded-md hover:bg-gray-500 transition duration-300 hover:cursor-pointer font-semibold"
+                  >
+                    Cancel
+                  </button>
+
+                  <p className="px-3 py-1 bg-yellow-500 text-black rounded-lg hover:bg-yellow-600 transition duration-300 font-semibold">
+                    Pending...
+                  </p>
+                </div>
               </div>
-            </div>
-          );
-        })}
+            );
+          })}
       </div>
     </>
   );

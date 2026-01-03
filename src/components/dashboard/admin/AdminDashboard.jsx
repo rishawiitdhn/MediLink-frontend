@@ -25,7 +25,6 @@ export default function AdminDashboard() {
   const [isAnalytics, setIsAnalytics] = useState(false);
   const [isPharmacies, setIsPharmacies] = useState(false);
 
-
   const listItems = [
     setIsOverview,
     setIsDoctors,
@@ -35,12 +34,12 @@ export default function AdminDashboard() {
     setIsPatients,
   ];
 
-  useEffect(()=>{
-    if((location.state) && (location.state.from==="AddHospital")){
+  useEffect(() => {
+    if (location.state && location.state.from === "AddHospital") {
       setIsOverview(false);
       setIsHospitals(true);
     }
-    if((location.state) && (location.state.from==="deleteHospital")){
+    if (location.state && location.state.from === "deleteHospital") {
       setIsOverview(false);
       setIsHospitals(true);
     }
@@ -52,6 +51,7 @@ export default function AdminDashboard() {
       if (item !== listItem) item(false);
     }
   };
+
 
   return (
     <>
