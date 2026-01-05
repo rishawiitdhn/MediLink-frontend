@@ -17,13 +17,12 @@ export default function DoctorDashboard() {
   const navigate = useNavigate();
   const [todayAppointments, setTodayAppointments] = useState([]);
   const [doctor, setDoctor] = useState({});
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   const doctorId = localStorage.getItem("userId");
-
+  const role = localStorage.getItem("role");
   useEffect(() => {
     const getTodayAppointments = async () => {
-      const role = localStorage.getItem("role");
       try {
         setIsLoading(true);
         const res = await axios.get(
@@ -34,8 +33,14 @@ export default function DoctorDashboard() {
             },
           }
         );
+
         const appts = res.data.filter((appt) => appt.isDone === false);
         setTodayAppointments(appts);
+
+        const res1 = await axios.get(
+          `https://medilink-backend-1-26fb.onrender.com/doctor/${doctorId}`
+        );
+        setDoctor(res1.data);
         setIsLoading(false);
       } catch (err) {
         console.error(
@@ -45,29 +50,12 @@ export default function DoctorDashboard() {
         if (err.response && err.response.data.message) {
           toast.error(err.response.data.message);
         } else toast.error("Something went wrong!!");
+      } finally{
+        setIsLoading(false);
       }
     };
 
     getTodayAppointments();
-  }, []);
-
-  useEffect(() => {
-    const getDoctorById = async () => {
-      try {
-        setIsLoading(true);
-        const res = await axios.get(
-          `https://medilink-backend-1-26fb.onrender.com/doctor/${doctorId}`
-        );
-        setDoctor(res.data);
-        setIsLoading(false);
-      } catch (err) {
-        console.error("Error during fetching doctor details: ", err);
-        if (err.response && err.response.message) {
-          toast.error(err.response.message);
-        } else toast.error("Something went wrong!!");
-      }
-    };
-    getDoctorById();
   }, []);
 
   if (isLoading)
