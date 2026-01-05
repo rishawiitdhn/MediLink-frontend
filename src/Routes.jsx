@@ -28,7 +28,7 @@ const ProjectRoutes = () => {
     const roleFromStorage = localStorage.getItem("role");
     if (
       !userIdFromStorage &&
-      !["/login", "/signup", "/"].includes(window.location.pathname)
+      !["/login", "/register", "/"].includes(window.location.pathname)
     ) {
       navigate("/");
     }

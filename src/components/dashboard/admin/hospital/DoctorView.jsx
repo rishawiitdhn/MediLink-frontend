@@ -32,7 +32,7 @@ export default function DoctorView({ doctorList, hospitalId }) {
 
   const approveDoctors = async (id) => {
     try {
-      setIsApproving(true);
+      setIsApproving(true); 
       const res = await axios.patch(
         `https://medilink-backend-1-26fb.onrender.com/admin/doctor/approve/${id}`,
         {},

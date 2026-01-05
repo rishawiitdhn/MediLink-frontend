@@ -1,5 +1,5 @@
 import axios from "axios";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { toast } from "react-toastify";
 import { MdEmail } from "react-icons/md";
 import { FaPhoneAlt } from "react-icons/fa";
@@ -11,16 +11,20 @@ export default function () {
   const [pharmacies, setPharmacies] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isApproving, setIsApproving] = useState(false);
+  const isFirstRender = useRef(true);
 
   useEffect(() => {
     const getAllPharmacies = async () => {
       try {
-        setIsLoading(true);
+        if(isFirstRender.current)setIsLoading(true);
         const res = await axios.get(
           "https://medilink-backend-1-26fb.onrender.com/pharmacy/all"
         );
         setPharmacies(res.data);
-        setIsLoading(false);
+        if(isFirstRender.current){
+          setIsLoading(false);
+          isFirstRender.current = false;
+        }
       } catch (err) {
         console.error("Error during fetching all pharmacies: ", err);
         if (err.response && err.response.message) {
@@ -113,9 +117,9 @@ export default function () {
                       : "bg-red-500 hover:bg-red-600"
                   } ${
                     isApproving
-                      ? "cursor-not-allowed opacity-10"
+                      ? "cursor-not-allowed opacity-50"
                       : "cursor-pointer opacity-100"
-                  }transition`}
+                  } transition`}
                 >
                   {pharmacy.verified ? (
                     <>

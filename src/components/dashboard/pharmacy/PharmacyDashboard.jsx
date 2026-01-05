@@ -16,7 +16,6 @@ import { SiTicktick } from "react-icons/si";
 import SearchIcon from "@mui/icons-material/Search";
 import CircularProgress from "@mui/material/CircularProgress";
 
-const pharmacyId = localStorage.getItem("userId");
 export default function PharmacyDashboard() {
   const [open, setOpen] = useState(false);
   const [prescriptions, setPrescriptions] = useState([]);
@@ -38,6 +37,7 @@ export default function PharmacyDashboard() {
     const getAllPrescriptions = async () => {
       try {
         if (isFirstRender.current) setIsLoading(true);
+        const pharmacyId = localStorage.getItem("userId");
         const role = localStorage.getItem("role");
         const res = await axios.get(
           `https://medilink-backend-1-26fb.onrender.com/pharmacy/prescriptions/${pharmacyId}`,
@@ -64,7 +64,7 @@ export default function PharmacyDashboard() {
       }
     };
     getAllPrescriptions();
-  }, [open, pharmacyId]);
+  }, [open]);
   const handleClose = () => setOpen(false);
 
   const handlePrescriptionStatus = async () => {

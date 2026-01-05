@@ -173,7 +173,7 @@ export default function Doctor() {
                         doctor.verified === true
                           ? "bg-green-500 hover:bg-green-600 transition"
                           : "bg-red-500 hover:bg-red-600 transition"
-                      } {isApproving ? "cursor-not-allowed opacity-50" : "cursor-pointer opacity-100"}`}
+                      } ${isApproving ? "cursor-not-allowed opacity-50" : "cursor-pointer opacity-100"}`}
                     >
                       {doctor.verified === true ? (
                         <p className="flex items-center gap-2">

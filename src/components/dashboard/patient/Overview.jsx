@@ -275,7 +275,7 @@ export default function Overview() {
                         disabled={isSubmitting}
                         className={`px-4 py-1 text-white rounded-lg font-semibold mt-2 ${
                           isSubmitting
-                            ? "hover:cursor-not-allowed"
+                            ? "hover:cursor-not-allowed opacity-50"
                             : "hover:cursor-pointer"
                         } ${
                           doctor.appointments.find(

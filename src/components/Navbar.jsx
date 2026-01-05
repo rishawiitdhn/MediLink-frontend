@@ -1,10 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { FaUserMd, FaHospital, FaPills, FaBars, FaTimes } from "react-icons/fa";
-import SearchIcon from "@mui/icons-material/Search";
 import medilink from "../assets/medilink.png";
-import Link from "@mui/material/Link";
 import { useNavigate } from "react-router-dom";
-import { IoPersonCircle } from "react-icons/io5";
 import { toast } from "react-toastify";
 
 
