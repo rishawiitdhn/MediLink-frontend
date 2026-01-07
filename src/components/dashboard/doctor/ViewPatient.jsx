@@ -41,9 +41,7 @@ export default function ViewPatient() {
   useEffect(() => {
     const getPatient = async () => {
       try {
-        {
-          isFirstRender.current && setIsLoading(true);
-        }
+        if(isFirstRender.current)setIsLoading(true);
         const res = await axios.get(
           `https://medilink-backend-1-26fb.onrender.com/patient/${patientId}`
         );
@@ -52,8 +50,10 @@ export default function ViewPatient() {
         );
         setPatient(res.data);
         setDoctor(res1.data);
-        setIsLoading(false);
-        isFirstRender.current = false;
+        if(isFirstRender.current){
+          setIsLoading(false);
+          isFirstRender.current = false;
+      }
       } catch (err) {
         console.error("Error during fetching doctor details: ", err);
         if (err.response && err.response.message) {

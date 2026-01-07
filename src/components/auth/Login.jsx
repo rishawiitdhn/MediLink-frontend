@@ -7,9 +7,11 @@ import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import LinearProgress from "@mui/material/LinearProgress";
 import { toast } from "react-toastify";
+import { useAuth } from "../../AuthContex";
 
 export default function Login() {
   const navigate = useNavigate();
+  const { currUser, setCurrUser, currRole, setCurrRole } = useAuth();
   const {
     register,
     handleSubmit,
@@ -38,6 +40,8 @@ export default function Login() {
       localStorage.setItem("token", result.data.token);
       localStorage.setItem("userId", result.data.userId);
       localStorage.setItem("role", result.data.role);
+      setCurrRole(result.data.role);
+      setCurrUser(result.data.userId);
 
       toast.success("Welcome back to MediLink!");
       navigate("/");

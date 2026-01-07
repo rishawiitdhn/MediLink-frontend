@@ -1,10 +1,7 @@
 import Footer from "../../../Footer";
 import Navbar from "../../../Navbar";
-import AdminDashboard from "../AdminDashboard";
 import Card from "@mui/material/Card";
-import CardActions from "@mui/material/CardActions";
 import CardContent from "@mui/material/CardContent";
-import CardMedia from "@mui/material/CardMedia";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import { useParams } from "react-router-dom";
@@ -123,7 +120,7 @@ export default function HospitalView() {
             <img
               src={hospital.image?.url}
               alt="hospital_image"
-              className=" w-lg p-5"
+              className=" w-lg h-120 p-5"
             />
             <hr className="mx-2" />
             <CardContent>

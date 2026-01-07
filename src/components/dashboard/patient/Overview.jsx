@@ -27,7 +27,10 @@ export default function Overview() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  const [selectedDate, setSelectedDate] = useState(dayjs());
+  const todayDate = new Date();
+  todayDate.setHours(0, 0, 0, 0);
+  const [selectedDate, setSelectedDate] = useState(dayjs()); // This is the dayjs date format we took from mui date picker
+  const [ISTDate, setISTDate] = useState(todayDate); // This is the simple Date() object taken for comparision
 
   const userId = localStorage.getItem("userId");
   const role = localStorage.getItem("role");
@@ -66,7 +69,7 @@ export default function Overview() {
           "https://medilink-backend-1-26fb.onrender.com/doctor/all/verified"
         );
         setDoctors(res1.data);
-
+        // console.log(res1.data);
         const res2 = await axios.get(
           `https://medilink-backend-1-26fb.onrender.com/patient/${userId}`
         );
@@ -100,7 +103,7 @@ export default function Overview() {
       );
       setSearchResults(filterDoctors);
     }
-  }, [searchVal, doctors, searchResults]);
+  }, [searchVal, doctors]);
 
   const handleAppointment = async (doctor) => {
     try {
@@ -116,6 +119,7 @@ export default function Overview() {
           },
         }
       );
+      console.log(res.data);
       setIsSubmitting(false);
       setRefresh((prev) => !prev);
       if (res.data.type === "info") toast.info(res.data.message);
@@ -130,9 +134,9 @@ export default function Overview() {
 
   const handleDateChange = (value) => {
     setSelectedDate(value);
-    // const date = new Date(selectedDate).toISOString();
-    // console.log(selectedDate.toISOString());
-    // console.log(selectedDate.format("YYYY-MM-DD"));
+    const date = new Date(value.format("YYYY-MM-DD"));
+    date.setHours(0, 0, 0, 0);
+    setISTDate(date);
   };
 
   if (isLoading)
@@ -277,12 +281,13 @@ export default function Overview() {
                           isSubmitting
                             ? "hover:cursor-not-allowed opacity-50"
                             : "hover:cursor-pointer"
-                        } ${
+                        } 
+                        ${
                           doctor.appointments.find(
                             (appt) =>
-                              appt.patient === userId &&
-                              appt.date.split("T")[0] ===
-                                selectedDate.format("YYYY-MM-DD") &&
+                              appt.patient.toString() === userId &&
+                              dayjs(appt.date).format("YYYY-MM-DD") ===
+                                dayjs(ISTDate).format("YYYY-MM-DD") &&
                               appt.isDone === false
                           )
                             ? "bg-green-500 hover:bg-green-600 transition"
@@ -291,9 +296,9 @@ export default function Overview() {
                       >
                         {doctor.appointments.find(
                           (appt) =>
-                            appt.patient === userId &&
-                            appt.date.split("T")[0] ===
-                              selectedDate.format("YYYY-MM-DD") &&
+                            appt.patient.toString() === userId &&
+                            dayjs(appt.date).format("YYYY-MM-DD") ===
+                              dayjs(ISTDate).format("YYYY-MM-DD") &&
                             appt.isDone === false
                         ) ? (
                           <p className="flex items-center gap-2">

@@ -2,11 +2,13 @@ import React, { useState, useEffect } from "react";
 import medilink from "../assets/medilink.png";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import { useAuth } from "../AuthContex";
 
 
 export default function Navbar() {
   const navigate = useNavigate();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const { currUser, setCurrUser, currRole, setCurrRole } = useAuth();
 
   useEffect(() => {
     const userIdFromStorage = localStorage.getItem("userId");
@@ -17,6 +19,8 @@ export default function Navbar() {
     localStorage.removeItem("userId");
     localStorage.removeItem("token");
     localStorage.removeItem("role");
+    setCurrUser(null);
+    setCurrRole(null);
     setIsLoggedIn(false);
     navigate("/");
     toast.success("Successfully logged out!");

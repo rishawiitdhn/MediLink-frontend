@@ -34,6 +34,7 @@ export default function DoctorDashboard() {
           }
         );
 
+        console.log(res.data);
         const appts = res.data.filter((appt) => appt.isDone === false);
         setTodayAppointments(appts);
 

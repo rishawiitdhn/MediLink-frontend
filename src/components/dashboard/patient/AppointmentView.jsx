@@ -10,6 +10,7 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
 import CircularProgress from "@mui/material/CircularProgress";
+import dayjs from "dayjs";
 
 export default function AppointmentView() {
   const [appointments, setAppointments] = useState([]);
@@ -198,7 +199,7 @@ export default function AppointmentView() {
               >
                 <div className="">
                   <p className="text-xl font-bold wrap-break-word">
-                    {appointment.date.split("T")[0]}
+                    {dayjs(appointment.date).format("DD MMM YYYY")}
                   </p>
 
                   <p className="text-lg font-semibold font-serif text-gray-800 wrap-break-word">

@@ -1,12 +1,13 @@
-import React, { useState } from "react";
-import { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate, useRoutes } from "react-router-dom";
+import { CircularProgress } from "@mui/material";
 
-//Auth context
+// Auth context
 import { useAuth } from "./AuthContex";
+
+// Pages
 import Signup from "./components/auth/Signup";
 import Login from "./components/auth/Login";
-
 import Dashboard from "./components/dashboard/Dashboard";
 import AdminDashboard from "./components/dashboard/admin/AdminDashboard";
 import HospitalView from "./components/dashboard/admin/hospital/HospitalView";
@@ -18,73 +19,98 @@ import Prescription from "./components/dashboard/doctor/Prescription";
 import NotAuthorised from "./components/NotAuthorised";
 import NotFound from "./components/NotFound";
 
+import ProtectedRoute from "./ProtectedRoute";
 
 const ProjectRoutes = () => {
-  const { currUser, setCurrUser } = useAuth();
-  const [role, setRole] = useState(()=>localStorage.getItem("role"));
-  const navigate = useNavigate();
-  useEffect(() => {
-    const userIdFromStorage = localStorage.getItem("userId");
-    const roleFromStorage = localStorage.getItem("role");
-    if (
-      !userIdFromStorage &&
-      !["/login", "/register", "/"].includes(window.location.pathname)
-    ) {
-      navigate("/");
-    }
-
-    if (userIdFromStorage && !currUser) {
-      setCurrUser(userIdFromStorage);
-      setRole(roleFromStorage);
-    }
-  }, [currUser, setCurrUser, navigate]);
-
+  const { currUser, setCurrUser, currRole, setCurrRole } = useAuth();
+  
   const element = useRoutes([
-    {
-      path: "/",
-      element: <Dashboard />,
-    },
-    {
-      path: "/register",
-      element: <Signup />,
-    },
-    {
-      path: "/login",
-      element: <Login />,
-    },
+    { path: "/", element: <Dashboard /> },
+    { path: "/register", element: <Signup /> },
+    { path: "/login", element: <Login /> },
+
     {
       path: "/adminDashboard",
-      element: role === "admin" ? <AdminDashboard /> : <NotAuthorised />,
+      element: (
+        <ProtectedRoute currRole={currRole} allowedRole="admin">
+          <AdminDashboard />
+        </ProtectedRoute>
+      ),
     },
     {
       path: "/admin/hospital/:hospitalId",
-      element: role === "admin" ? <HospitalView /> : <NotAuthorised />,
+      element: (
+        <ProtectedRoute currRole={currRole} allowedRole="admin">
+          <HospitalView />
+        </ProtectedRoute>
+      ),
     },
     {
       path: "/admin/hospital",
-      element: role === "admin" ? <AddHospital /> : <NotAuthorised />,
+      element: (
+        <ProtectedRoute currRole={currRole} allowedRole="admin">
+          <AddHospital />
+        </ProtectedRoute>
+      ),
     },
     {
       path: "/admin/hospital/update/:hospitalId",
-      element: role === "admin" ? <UpdateHospital /> : <NotAuthorised />,
+      element: (
+        <ProtectedRoute currRole={currRole} allowedRole="admin">
+          <UpdateHospital />
+        </ProtectedRoute>
+      ),
     },
     {
       path: "/patientDashboard",
-      element: role === "patient" ? <PatientDashboard /> : <NotAuthorised />,
+      element: (
+        <ProtectedRoute currRole={currRole} allowedRole="patient">
+          <PatientDashboard />
+        </ProtectedRoute>
+      ),
     },
     {
       path: "/doctor/prescription/:patientId",
-      element: role === "doctor" ? <Prescription /> : <NotAuthorised />,
+      element: (
+        <ProtectedRoute currRole={currRole} allowedRole="doctor">
+          <Prescription />
+        </ProtectedRoute>
+      ),
     },
     {
       path: "/doctor/:patientId",
-      element: role === "doctor" ? <ViewPatient /> : <NotAuthorised />,
+      element: (
+        <ProtectedRoute currRole={currRole} allowedRole="doctor">
+          <ViewPatient />
+        </ProtectedRoute>
+      ),
     },
-    {
-      path: "*",
-      element: <NotFound />,
-    },
+
+    { path: "/not-authorised", element: <NotAuthorised /> },
+    { path: "*", element: <NotFound /> },
   ]);
+
+   const [isReady, setIsReady] = useState(false);
+
+useEffect(() => {
+  const userId = localStorage.getItem("userId");
+  const role = localStorage.getItem("role");
+
+  if (userId && role) {
+    setCurrUser(userId);
+    setCurrRole(role);
+  }
+  setIsReady(true);
+
+}, []);
+
+if (!isReady)
+  return (
+    <div className="flex justify-center items-center min-h-screen">
+      <CircularProgress size="3rem" />
+    </div>
+  );
+
   return element;
 };
 
